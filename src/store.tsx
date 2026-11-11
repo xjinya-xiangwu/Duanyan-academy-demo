@@ -1,55 +1,64 @@
-import { createContext, useContext, useEffect, useReducer, type Dispatch, type ReactNode } from "react";
-import { initialState, reducer } from "./domain/reducer";
-import type { Action, AppState } from "./domain/types";
+import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
+import { initialState, reducer, type Action, type DemoState } from "./domain/logic";
 
-const STORAGE_KEY = "duanyan-academy-demo-v02";
+const KEY = "duanyan-academy-demo-v03";
 
-type StoreValue = {
-  state: AppState;
-  dispatch: Dispatch<Action>;
-};
-
-const StoreContext = createContext<StoreValue | null>(null);
-
-function isAppState(value: unknown): value is AppState {
-  if (!value || typeof value !== "object") return false;
-  const record = value as AppState;
-  return (
-    Array.isArray(record.stages) &&
-    record.stages.length === 3 &&
-    Array.isArray(record.events) &&
-    typeof record.metrics?.optimize === "number" &&
-    typeof record.metrics.return === "number" &&
-    typeof record.metrics.evaluate === "number"
-  );
-}
-
-function readState(): AppState {
-  if (typeof localStorage === "undefined") return initialState;
+function load(): DemoState {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(KEY);
     if (!raw) return initialState;
-    const parsed: unknown = JSON.parse(raw);
-    return isAppState(parsed) ? parsed : initialState;
+    const parsed = JSON.parse(raw) as DemoState;
+    if (parsed.version !== 3 || !parsed.slots || !parsed.work || !parsed.events) return initialState;
+    return parsed;
   } catch {
     return initialState;
   }
 }
 
-export function StoreProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, readState);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
-
-  return <StoreContext.Provider value={{ state, dispatch }}>{children}</StoreContext.Provider>;
+interface DemoApi {
+  state: DemoState;
+  dispatch: (action: Action) => void;
 }
 
-export function useStore(): StoreValue {
-  const value = useContext(StoreContext);
-  if (!value) {
-    throw new Error("StoreProvider 缺失");
-  }
+const DemoContext = createContext<DemoApi | null>(null);
+
+export function DemoProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(reducer, undefined, load);
+  useEffect(() => {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }, [state]);
+  return <DemoContext.Provider value={{ state, dispatch }}>{children}</DemoContext.Provider>;
+}
+
+export function useDemo(): DemoApi {
+  const value = useContext(DemoContext);
+  if (!value) throw new Error("DemoProvider missing");
   return value;
+}
+
+export function useDelayedDispatch() {
+  const { dispatch } = useDemo();
+  const [busy, setBusy] = useState(false);
+  const lock = useRef(false);
+  const timer = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+    };
+  }, []);
+
+  function later(action: Action, ms = 450) {
+    if (lock.current) return;
+    lock.current = true;
+    setBusy(true);
+    timer.current = window.setTimeout(() => {
+      dispatch(action);
+      lock.current = false;
+      setBusy(false);
+      timer.current = null;
+    }, ms);
+  }
+
+  return { busy, dispatch, later };
 }
