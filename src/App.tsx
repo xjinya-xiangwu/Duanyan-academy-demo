@@ -1,39 +1,53 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { useDemo, DemoProvider } from "./store";
+import { BrowserRouter, Link, Navigate, Outlet, Route, Routes, useParams } from "react-router-dom";
+import { CourseProvider } from "./store";
 import { Shell } from "./shell";
-import { CatalogPage, CoursePage, DuanyanPage, EnterPage, PracticePage, TeachPage } from "./pages/student";
-import { AssignPage, ProgressPage, ReviewPage, TeacherCoursesPage, TemplatePage } from "./pages/teacher";
-import { MetricsPage } from "./pages/metrics";
+import { CLOSED_ID, COURSE_ID, paths } from "./domain/model";
+import { CatalogPage } from "./pages/CatalogPage";
+import { EnterPage } from "./pages/EnterPage";
+import { CourseHomePage } from "./pages/CourseHomePage";
+import { LessonPage } from "./pages/LessonPage";
+import { QuizPage } from "./pages/QuizPage";
+import { AssignmentPage } from "./pages/AssignmentPage";
+import { StudioPage } from "./pages/StudioPage";
+import { PeerPage } from "./pages/PeerPage";
 
-function Home() {
-  const { state } = useDemo();
-  if (state.role === "student") return <Navigate to="/catalog" replace />;
-  return <Navigate to="/teacher/courses" replace />;
+function CourseLayout() {
+  const { courseId } = useParams();
+  if (courseId === CLOSED_ID) {
+    return (
+      <p>
+        这门课尚未开放，不能从这里上课。 <Link to={paths.catalog}>回课表</Link>
+      </p>
+    );
+  }
+  if (courseId !== COURSE_ID) return <p>没有这门课。</p>;
+  return <Outlet />;
 }
 
 export function App() {
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, "");
   return (
-    <BrowserRouter basename="/Duanyan-academy-demo">
-      <DemoProvider>
+    <BrowserRouter basename={basename}>
+      <CourseProvider>
         <Routes>
           <Route element={<Shell />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/catalog" element={<CatalogPage />} />
-            <Route path="/enter" element={<EnterPage />} />
-            <Route path="/course" element={<CoursePage />} />
-            <Route path="/lesson/teach/:step" element={<TeachPage />} />
-            <Route path="/lesson/practice/:step" element={<PracticePage />} />
-            <Route path="/duanyan" element={<DuanyanPage />} />
-            <Route path="/teacher/courses" element={<TeacherCoursesPage />} />
-            <Route path="/teacher/template" element={<TemplatePage />} />
-            <Route path="/teacher/assign" element={<AssignPage />} />
-            <Route path="/teacher/progress" element={<ProgressPage />} />
-            <Route path="/teacher/review/:id" element={<ReviewPage />} />
-            <Route path="/metrics" element={<MetricsPage />} />
+            <Route index element={<CatalogPage />} />
+            <Route path="courses" element={<Navigate to="/" replace />} />
+            <Route path="courses/:courseId" element={<CourseLayout />}>
+              <Route index element={<CourseHomePage />} />
+              <Route path="enter" element={<EnterPage />} />
+              <Route path="lessons/1" element={<LessonPage />} />
+              <Route path="quizzes/1" element={<QuizPage />} />
+              <Route path="quizzes/1/feedback" element={<QuizPage />} />
+              <Route path="assignments/:step" element={<AssignmentPage />} />
+              <Route path="assignments/:step/feedback" element={<AssignmentPage />} />
+              <Route path="studio" element={<StudioPage />} />
+              <Route path="peer" element={<PeerPage />} />
+            </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
-      </DemoProvider>
+      </CourseProvider>
     </BrowserRouter>
   );
 }
