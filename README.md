@@ -36,7 +36,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-截图目录默认是仓库里的 `e2e/screenshots`。要改目录，设置环境变量 `E2E_SCREENSHOT_DIR`。`npm test` 只跑状态机，不安装浏览器。GitHub Actions 因此不跑 `test:e2e`。
+这条命令会在 `5174` 启动当前这份代码，不会复用已经占用 `5173` 的服务。本地 `npm run dev` 仍是 `5173`。截图目录默认是仓库里的 `e2e/screenshots`。要改目录，设置环境变量 `E2E_SCREENSHOT_DIR`。`npm test` 只跑状态机，不安装浏览器。GitHub Actions 因此不跑 `test:e2e`。
 
 进度保存在当前浏览器的 `localStorage`。页脚的「重置本课进度」回到起点。身份切换在页脚。
 
