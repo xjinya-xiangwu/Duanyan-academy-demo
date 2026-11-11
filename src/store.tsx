@@ -1,64 +1,46 @@
-import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
-import { initialState, reducer, type Action, type DemoState } from "./domain/logic";
+import { createContext, useContext, useEffect, useReducer, type Dispatch, type ReactNode } from "react";
+import { initialState, reducer } from "./domain/model";
+import type { Action, DemoState } from "./domain/model";
 
-const KEY = "duanyan-academy-demo-v03";
+const STORAGE_KEY = "duanyan-academy-demo-v04";
 
-function load(): DemoState {
+type StoreValue = {
+  state: DemoState;
+  dispatch: Dispatch<Action>;
+};
+
+const StoreContext = createContext<StoreValue | null>(null);
+
+function isState(value: unknown): value is DemoState {
+  if (!value || typeof value !== "object") return false;
+  const record = value as DemoState;
+  return record.version === 4 && Boolean(record.units?.q1) && Boolean(record.units?.a4) && Boolean(record.draft);
+}
+
+function readState(): DemoState {
+  if (typeof localStorage === "undefined") return initialState;
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return initialState;
-    const parsed = JSON.parse(raw) as DemoState;
-    if (parsed.version !== 3 || !parsed.slots || !parsed.work || !parsed.events) return initialState;
-    return parsed;
+    const parsed: unknown = JSON.parse(raw);
+    return isState(parsed) ? { ...parsed, notice: null } : initialState;
   } catch {
     return initialState;
   }
 }
 
-interface DemoApi {
-  state: DemoState;
-  dispatch: (action: Action) => void;
-}
+export function CourseProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(reducer, undefined, readState);
 
-const DemoContext = createContext<DemoApi | null>(null);
-
-export function DemoProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, load);
   useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
-  return <DemoContext.Provider value={{ state, dispatch }}>{children}</DemoContext.Provider>;
+
+  return <StoreContext.Provider value={{ state, dispatch }}>{children}</StoreContext.Provider>;
 }
 
-export function useDemo(): DemoApi {
-  const value = useContext(DemoContext);
-  if (!value) throw new Error("DemoProvider missing");
+export function useCourse(): StoreValue {
+  const value = useContext(StoreContext);
+  if (!value) throw new Error("缺少课程状态");
   return value;
-}
-
-export function useDelayedDispatch() {
-  const { dispatch } = useDemo();
-  const [busy, setBusy] = useState(false);
-  const lock = useRef(false);
-  const timer = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timer.current !== null) window.clearTimeout(timer.current);
-    };
-  }, []);
-
-  function later(action: Action, ms = 450) {
-    if (lock.current) return;
-    lock.current = true;
-    setBusy(true);
-    timer.current = window.setTimeout(() => {
-      dispatch(action);
-      lock.current = false;
-      setBusy(false);
-      timer.current = null;
-    }, ms);
-  }
-
-  return { busy, dispatch, later };
 }
