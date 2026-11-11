@@ -10,8 +10,15 @@ import {
   missingAssignments,
   paths,
   statusLabel,
+  type PracticeStep,
+  type SlotStatus,
 } from "../domain/model";
 import { useCourse } from "../store";
+
+function assignmentEntry(status: SlotStatus, step: PracticeStep) {
+  if (status === "locked") return <span className="quiet">未解锁</span>;
+  return <Link to={paths.assignment(step)}>打开</Link>;
+}
 
 export function CourseHomePage() {
   const { state, dispatch } = useCourse();
@@ -61,7 +68,7 @@ export function CourseHomePage() {
             <h2>作业 · 课题与 Agent 界定</h2>
             <p>打开本课课题，写出可检验的问题界定。</p>
             <p data-testid="status-a2">状态：{statusLabel(state.units.a2.status)}</p>
-            <Link to={paths.assignment(2)}>打开</Link>
+            {assignmentEntry(state.units.a2.status, 2)}
           </div>
         </li>
         <li data-testid="unit-a3">
@@ -70,7 +77,7 @@ export function CourseHomePage() {
             <h2>作业 · Agent 论文</h2>
             <p>写大纲中的一段，并给出引用主张。</p>
             <p data-testid="status-a3">状态：{statusLabel(state.units.a3.status)}</p>
-            <Link to={paths.assignment(3)}>打开</Link>
+            {assignmentEntry(state.units.a3.status, 3)}
           </div>
         </li>
         <li data-testid="unit-a4">
@@ -79,7 +86,7 @@ export function CourseHomePage() {
             <h2>作业 · 图生</h2>
             <p>为同一课题放一张机制示意。</p>
             <p data-testid="status-a4">状态：{statusLabel(state.units.a4.status)}</p>
-            <Link to={paths.assignment(4)}>打开</Link>
+            {assignmentEntry(state.units.a4.status, 4)}
           </div>
         </li>
         <li data-testid="unit-peer">

@@ -64,6 +64,11 @@ test("附录 A：学员学完课程，结果回到原位，再走请修改", asy
   await expect(outline).toContainText("可选互评");
   await expect(page.getByTestId("status-a3")).toHaveText("状态：未解锁");
   await expect(page.getByTestId("status-a4")).toHaveText("状态：未解锁");
+  await expect(page.getByTestId("unit-a2").getByRole("link", { name: "打开" })).toHaveCount(1);
+  await expect(page.getByTestId("unit-a3").getByRole("link", { name: "打开" })).toHaveCount(0);
+  await expect(page.getByTestId("unit-a4").getByRole("link", { name: "打开" })).toHaveCount(0);
+  await expect(page.getByTestId("unit-a3").getByText("未解锁", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("unit-a4").getByText("未解锁", { exact: true })).toBeVisible();
   await shot(page, "course-home");
 
   await page.getByRole("link", { name: "阅读" }).click();
@@ -130,6 +135,10 @@ test("附录 A：学员学完课程，结果回到原位，再走请修改", asy
   await page.getByTestId("check-ready").click();
   await expect(page.getByTestId("notice")).toContainText("作业 ③");
   await expect(page.getByTestId("status-a2")).toHaveText("状态：已交");
+  await expect(page.getByTestId("status-a3")).toHaveText("状态：未开始");
+  await expect(page.getByTestId("unit-a3").getByRole("link", { name: "打开" })).toHaveCount(1);
+  await expect(page.getByTestId("status-a4")).toHaveText("状态：未解锁");
+  await expect(page.getByTestId("unit-a4").getByRole("link", { name: "打开" })).toHaveCount(0);
   await page.getByTestId("unit-a3").getByRole("link", { name: "打开" }).click();
   await page.getByTestId("open-duanyan").click();
   await page.getByTestId("generate-artifact").click();
@@ -154,6 +163,8 @@ test("附录 A：学员学完课程，结果回到原位，再走请修改", asy
   await expect(page.getByTestId("status-a2")).toHaveText("状态：待反馈");
   await expect(page.getByTestId("status-a3")).toHaveText("状态：待反馈");
   await expect(page.getByTestId("status-a4")).toHaveText("状态：待反馈");
+  await expect(page.getByTestId("unit-a3").getByRole("link", { name: "打开" })).toHaveCount(1);
+  await expect(page.getByTestId("unit-a4").getByRole("link", { name: "打开" })).toHaveCount(1);
   await expect(page.getByTestId("learning-place")).toHaveText("学到：作业 ②③④ 待老师反馈");
   await page.getByTestId("checkoff").click();
   await expect(page.getByTestId("notice")).toContainText("勾选不计");
