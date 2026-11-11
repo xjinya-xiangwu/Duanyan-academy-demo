@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { ConfiguredCopy } from "../components/ConfiguredCopy";
 import { CourseHeader } from "../components/CourseHeader";
 import { LECTURE } from "../domain/content";
 import { paths } from "../domain/model";
@@ -10,7 +11,8 @@ export function LessonPage() {
     <article className="reading">
       <CourseHeader current="教学课时" />
       <p className="kicker">① 教学课时</p>
-      <h1>结合之后，活化信号怎么画</h1>
+      <h1 data-testid="configured-title">{state.configs.lesson.title}</h1>
+      <ConfiguredCopy configKey="lesson" />
       <div className="lecture">
         {LECTURE.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>

@@ -172,6 +172,9 @@ test("附录 A：学员学完课程，结果回到原位，再走请修改", asy
 
   await page.getByTestId("unit-a2").getByRole("link", { name: "打开" }).click();
   await page.getByTestId("role-teacher").click();
+  await expect(page.getByRole("heading", { name: "教师工作台" })).toBeVisible();
+  await expect(page.getByTestId("course-outline")).toHaveCount(0);
+  await page.getByRole("link", { name: "打开这次提交" }).nth(1).click();
   const timeline = page.getByTestId("timeline");
   await expect(timeline).toContainText("带入");
   await expect(timeline).toContainText("执行");
@@ -210,6 +213,7 @@ test("附录 A：学员学完课程，结果回到原位，再走请修改", asy
   await expect(page.getByTestId("slot-status")).toHaveText("状态：待反馈");
 
   await page.getByTestId("role-teacher").click();
+  await page.getByRole("link", { name: "打开这次提交" }).nth(1).click();
   await page.getByTestId("pass").click();
   await expect(page.getByTestId("notice")).toContainText("不是证书");
   await page.getByTestId("role-student").click();

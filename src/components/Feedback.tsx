@@ -24,6 +24,7 @@ export function ReturnedWork({ unitId }: { unitId: UnitId }) {
         <p className="quiet">这一节还没有回传结果。</p>
       )}
       {unit.slotFigure ? <Sketch level={unit.slotLevel} /> : null}
+      {unit.comment ? <p data-testid="teacher-comment">评论：{unit.comment}</p> : null}
       {unit.status === "passed" ? (
         <p data-testid="passed-copy">这一份已通过。这不是证书。</p>
       ) : null}
@@ -35,6 +36,7 @@ export function Feedback({ unitId }: { unitId: UnitId }) {
   const { state, dispatch } = useCourse();
   const [busy, setBusy] = useState(false);
   const unit = state.units[unitId];
+  const [comment, setComment] = useState(unit.comment);
   const blocked = feedbackBlock(state, unitId);
   const events = state.events.filter((event) => event.unitId === unitId);
 
@@ -79,6 +81,17 @@ export function Feedback({ unitId }: { unitId: UnitId }) {
         </div>
       ) : null}
       {blocked ? <p>{blocked}</p> : null}
+      <label className="stack" htmlFor={`comment-${unitId}`}>
+        评论
+        <textarea
+          id={`comment-${unitId}`}
+          data-testid="comment-input"
+          rows={3}
+          value={comment}
+          onChange={(event) => setComment(event.target.value)}
+        />
+      </label>
+      <p className="fine">请修改时建议写下要改的地方。通过也可以附一句。没有分数，评论也不计回流。</p>
       <div className="actions">
         <button type="button" data-testid="eval" disabled={busy || Boolean(blocked)} onClick={() => void evaluate()}>
           AI 辅助评估（演示）
@@ -87,7 +100,7 @@ export function Feedback({ unitId }: { unitId: UnitId }) {
           type="button"
           data-testid="pass"
           disabled={Boolean(blocked)}
-          onClick={() => dispatch({ type: "pass_unit", unitId })}
+          onClick={() => dispatch({ type: "pass_unit", unitId, comment })}
         >
           通过
         </button>
@@ -95,7 +108,7 @@ export function Feedback({ unitId }: { unitId: UnitId }) {
           type="button"
           data-testid="redo"
           disabled={Boolean(blocked)}
-          onClick={() => dispatch({ type: "redo_unit", unitId })}
+          onClick={() => dispatch({ type: "redo_unit", unitId, comment })}
         >
           请修改
         </button>

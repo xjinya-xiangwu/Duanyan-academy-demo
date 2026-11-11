@@ -20,7 +20,7 @@ export function CourseHeader({ current }: { current?: string }) {
       {state.role === "teacher" ? (
         <p className="teacher-jump">
           <Link to={paths.teacher} data-testid="teacher-view-link">
-            教师视图
+            教师工作台
           </Link>
           <Link to={paths.course}>返回课页</Link>
         </p>

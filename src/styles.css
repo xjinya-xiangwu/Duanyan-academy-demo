@@ -278,3 +278,100 @@ details { margin-top: 0.4rem; }
   h1 { font-size: 1.65rem; }
   .timeline li { grid-template-columns: 1fr; gap: 0.1rem; }
 }
+
+.wrap-wide { width: min(72rem, calc(100% - 1.5rem)); }
+
+.workbench {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+.workbench-nav {
+  background: #24312c;
+  color: #f6f1e7;
+  border-radius: 12px;
+  padding: 0.9rem 0.75rem 1rem;
+}
+
+.workbench-course {
+  margin: 0.2rem 0 0.8rem;
+  font-size: 0.95rem;
+}
+
+.workbench-nav nav, .workbench-nav .side-link { display: grid; gap: 0.15rem; }
+
+.workbench-nav a {
+  color: #f6f1e7;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.55rem;
+}
+
+.workbench-nav a.active, .workbench-nav a:hover { background: rgba(246, 241, 231, 0.14); }
+
+.workbench-nav .side-link { margin-top: 1rem; font-size: 0.88rem; }
+
+.workbench-nav .side-link a { color: #d9e2dc; }
+
+.workbench-main {
+  background: #fffdf8;
+  border: 1px solid #d7e0da;
+  border-radius: 12px;
+  padding: 0.4rem 1.1rem 1.3rem;
+}
+
+.workbench-main h1 {
+  font-family: "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
+}
+
+.skeleton {
+  list-style: none;
+  margin: 0.8rem 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.skeleton li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.55rem 0.7rem;
+  background: #f6f1e7;
+  border-radius: 8px;
+}
+
+.filters { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 0.8rem 0; }
+
+.filters label { display: grid; gap: 0.25rem; min-width: 10rem; font-size: 0.85rem; }
+
+.filters select {
+  width: 100%;
+  border: 1px solid #d9d0c3;
+  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
+  background: #fff;
+}
+
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+
+.data-table th, .data-table td {
+  text-align: left;
+  padding: 0.45rem 0.35rem;
+  border-bottom: 1px solid #e4d8c8;
+  vertical-align: top;
+}
+
+.data-table th { font-size: 0.8rem; color: #5e564c; font-weight: 600; }
+
+.configured {
+  margin: 0.7rem 0 1rem;
+  padding: 0.15rem 0 0.15rem 0.75rem;
+  border-left: 2px solid #e4d8c8;
+}
+
+@media (min-width: 860px) {
+  .workbench { grid-template-columns: 14.5rem minmax(0, 1fr); }
+}

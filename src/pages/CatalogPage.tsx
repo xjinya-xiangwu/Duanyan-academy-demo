@@ -45,7 +45,7 @@ export function CatalogPage() {
           {closedNote ? <p data-testid="catalog-block">{closedNote}</p> : null}
         </article>
       </div>
-      {teacher ? <p className="quiet">教师视图在课程里面，不在这张课表上。</p> : null}
+      {teacher ? <p className="quiet">教师工作台在这门课里面，不在这张课表上。</p> : null}
     </section>
   );
 }

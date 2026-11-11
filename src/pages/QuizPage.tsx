@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ConfiguredCopy } from "../components/ConfiguredCopy";
 import { CourseHeader } from "../components/CourseHeader";
 import { Feedback, ReturnedWork } from "../components/Feedback";
 import { TOPIC_TITLE, paths } from "../domain/model";
@@ -27,8 +28,9 @@ export function QuizPage() {
     <article>
       <CourseHeader current="测验 Q1" />
       <p className="kicker">课内测验</p>
-      <h1>Q1 · 课内检查</h1>
+      <h1 data-testid="configured-title">{state.configs.q1.title}</h1>
       <p>课题：{TOPIC_TITLE}</p>
+      <ConfiguredCopy configKey="q1" />
       <p>下面两题帮助你回忆讲义。它们不计回流，也不代替后面的作业。</p>
       {QUESTIONS.map((question, index) => (
         <fieldset key={question.id} className="question">
@@ -51,7 +53,6 @@ export function QuizPage() {
       ))}
       <section className="practice">
         <h2>短实训</h2>
-        <p>用两三句话写出这张图的边界，并回到这一测验。课题仍是上面这一门。</p>
         <ReturnedWork unitId="q1" />
         {locked ? null : (
           <Link className="go" to={paths.studio("q1")} data-testid="open-duanyan">

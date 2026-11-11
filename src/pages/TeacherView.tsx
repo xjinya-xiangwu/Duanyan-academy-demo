@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { CourseHeader } from "../components/CourseHeader";
 import { ROSTER, TEMPLATE_STEPS } from "../domain/content";
 import {
   STUDENT_NAME,
@@ -25,16 +24,13 @@ export function TeacherView() {
 
   return (
     <article>
-      <CourseHeader current="教师视图" />
-      <p className="kicker">同一门课</p>
-      <h1>本课的教师视图</h1>
-      <p>布置、班级进度和反馈都从这门课进入。正在上课的结构不会在这里被改掉。</p>
-      <nav className="section-jump" aria-label="本页章节">
-        <a href="#template">选用模板</a>
-        <a href="#publish">布置与发布</a>
-        <a href="#progress">班级进度</a>
-        <a href="#reflux">回流说明</a>
-      </nav>
+      <p className="kicker">同一门课 · 教师侧</p>
+      <h1>教师工作台</h1>
+      <p>配置、作业管理、数据集、布置和班级进度都在这一门课里。这不是学员看到的大纲。</p>
+      <p className="fine">
+        <span className="tag">演示／Mock</span>{" "}
+        <Link to={paths.course}>看学员课页</Link>
+      </p>
 
       <section id="template">
         <h2>选用模板</h2>
@@ -118,10 +114,7 @@ export function TeacherView() {
           <p>未进入</p>
         </article>
         <p className="fine">学员甲、学员乙是名单里的固定例子，不会跟着操作变化。</p>
-      </section>
-
-      <section id="reflux">
-        <h2>回流说明</h2>
+        <h3>回流数</h3>
         <p>
           真实科研轨迹数据回流数 <span className="tag">演示／Mock</span>
         </p>
@@ -142,11 +135,9 @@ export function TeacherView() {
             {countTypeLabel("return_follow")} <span data-testid="metric-return-follow">{metrics.returnFollow}</span>
           </li>
         </ul>
-        <p>计入：合法回传；优化成功；老师对某次提交做完一次辅助评估。</p>
-        <p>不计：教学已读、课页勾选、空点优化或评估、无效邀请码、只打开端砚。</p>
-        <p>去重：同一课题、同一单元、同一类型，重复回传不叠加。第二次成功优化可以再计一次，第三次起不加。同一单元的评估只计一次。</p>
         <p className="fine">
-          <Link to={paths.course}>回到这门课的大纲</Link>
+          口径在<Link to={paths.teacherRules}>回流说明</Link>，条目在
+          <Link to={paths.teacherDataset}>回流数据集</Link>。
         </p>
       </section>
     </article>

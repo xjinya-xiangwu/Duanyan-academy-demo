@@ -1,16 +1,21 @@
 import {
   baseArtifact,
   COURSE_ID,
+  DEFAULT_CONFIGS,
   INVITE_CODE,
   optimizeAddition,
   ROSTER,
+  STUDENT_NAME,
   suggestionFor,
   TOPIC_ID,
   unitShort,
+  type ConfigKey,
+  type UnitConfig,
   type UnitId,
 } from "./content";
 
-export type { UnitId } from "./content";
+export type { ConfigKey, UnitConfig, UnitId } from "./content";
+export { DEFAULT_CONFIGS };
 export {
   CLOSED_ID,
   CLOSED_TITLE,
@@ -66,6 +71,7 @@ export interface UnitState {
   returnCounted: boolean;
   evalCounted: boolean;
   suggestion: { tendency: "pass" | "redo"; headline: string; reasons: string[] } | null;
+  comment: string;
 }
 
 export interface DraftInstance {
@@ -77,7 +83,7 @@ export interface DraftInstance {
 }
 
 export interface DemoState {
-  version: 4;
+  version: 5;
   role: Role;
   enrolled: boolean;
   lessonRead: boolean;
@@ -89,6 +95,7 @@ export interface DemoState {
   notice: string | null;
   seq: number;
   draft: DraftInstance;
+  configs: Record<ConfigKey, UnitConfig>;
 }
 
 export type Action =
@@ -109,8 +116,9 @@ export type Action =
   | { type: "optimize"; unitId: UnitId; outcome: AsyncOutcome }
   | { type: "return_unit"; unitId: UnitId }
   | { type: "evaluate"; unitId: UnitId; outcome: AsyncOutcome }
-  | { type: "pass_unit"; unitId: UnitId }
-  | { type: "redo_unit"; unitId: UnitId }
+  | { type: "pass_unit"; unitId: UnitId; comment?: string }
+  | { type: "redo_unit"; unitId: UnitId; comment?: string }
+  | { type: "save_unit_config"; key: ConfigKey; config: UnitConfig }
   | { type: "create_template" }
   | { type: "strip_required" }
   | { type: "restore_required" }
@@ -133,11 +141,12 @@ function blankUnit(status: SlotStatus): UnitState {
     returnCounted: false,
     evalCounted: false,
     suggestion: null,
+    comment: "",
   };
 }
 
 export const initialState: DemoState = {
-  version: 4,
+  version: 5,
   role: "student",
   enrolled: true,
   lessonRead: false,
@@ -160,6 +169,7 @@ export const initialState: DemoState = {
     inviteCode: null,
     rosterImported: false,
   },
+  configs: structuredClone(DEFAULT_CONFIGS),
 };
 
 export const paths = {
@@ -170,7 +180,11 @@ export const paths = {
   quiz: `/courses/${COURSE_ID}/quizzes/1`,
   quizFeedback: `/courses/${COURSE_ID}/quizzes/1/feedback`,
   peer: `/courses/${COURSE_ID}/peer`,
-  teacher: `/courses/${COURSE_ID}?view=teacher`,
+  teacher: `/courses/${COURSE_ID}/teacher`,
+  teacherConfig: `/courses/${COURSE_ID}/teacher/config`,
+  teacherAssignments: `/courses/${COURSE_ID}/teacher/assignments`,
+  teacherDataset: `/courses/${COURSE_ID}/teacher/dataset`,
+  teacherRules: `/courses/${COURSE_ID}/teacher/rules`,
   assignment: (step: PracticeStep) => `/courses/${COURSE_ID}/assignments/${step}`,
   assignmentFeedback: (step: PracticeStep) => `/courses/${COURSE_ID}/assignments/${step}/feedback`,
   studio: (unitId: UnitId) => `/courses/${COURSE_ID}/studio?unit=${unitId}`,
@@ -206,6 +220,19 @@ export function unitPath(unitId: UnitId): string {
       return neverId;
     }
   }
+}
+
+export function teacherConfigPath(key: ConfigKey): string {
+  return `${paths.teacherConfig}/${key}`;
+}
+
+export function teacherAssignmentPath(unitId: UnitId): string {
+  return `${paths.teacherAssignments}/${unitId}`;
+}
+
+export function parseConfigKey(value: string | undefined): ConfigKey | null {
+  if (value === "lesson" || value === "q1" || value === "a2" || value === "a3" || value === "a4") return value;
+  return null;
 }
 
 export function unitFeedbackPath(unitId: UnitId): string {
@@ -353,6 +380,62 @@ export function learningPlace(state: DemoState): string {
   return "尚未开始";
 }
 
+export interface DatasetRow {
+  id: string;
+  student: string;
+  unitId: UnitId;
+  countType: CountType | null;
+  kind: EventKind | "artifact";
+  counted: boolean;
+  summary: string;
+  artifact: string | null;
+}
+
+export interface DatasetFilter {
+  student: string;
+  unitId: UnitId | "all";
+  countType: CountType | "all";
+}
+
+const DATASET_UNITS: readonly UnitId[] = ["q1", "a2", "a3", "a4"];
+
+export function datasetRows(state: DemoState): DatasetRow[] {
+  const rows: DatasetRow[] = state.events.map((event) => ({
+    id: event.id,
+    student: STUDENT_NAME,
+    unitId: event.unitId,
+    countType: event.countType,
+    kind: event.kind,
+    counted: event.counted,
+    summary: event.summary,
+    artifact: event.kind === "return" ? state.units[event.unitId].slotText : null,
+  }));
+  for (const unitId of DATASET_UNITS) {
+    const artifact = state.units[unitId].slotText;
+    if (!artifact) continue;
+    rows.push({
+      id: `artifact-${unitId}`,
+      student: STUDENT_NAME,
+      unitId,
+      countType: null,
+      kind: "artifact",
+      counted: false,
+      summary: "本单元回传的产物",
+      artifact,
+    });
+  }
+  return rows;
+}
+
+export function filterDataset(rows: DatasetRow[], filter: DatasetFilter): DatasetRow[] {
+  return rows.filter((row) => {
+    if (filter.student !== "all" && row.student !== filter.student) return false;
+    if (filter.unitId !== "all" && row.unitId !== filter.unitId) return false;
+    if (filter.countType !== "all" && row.countType !== filter.countType) return false;
+    return true;
+  });
+}
+
 export function feedbackBlock(state: DemoState, unitId: UnitId): string | null {
   const unit = state.units[unitId];
   if (unit.status === "awaiting_feedback") return null;
@@ -409,6 +492,11 @@ function pushEvent(
 
 function consumeFailure(state: DemoState, kind: FailureKind): void {
   if (state.failureArmed === kind) state.failureArmed = null;
+}
+
+function applyComment(unit: UnitState, comment: string | undefined): void {
+  if (comment === undefined) return;
+  unit.comment = comment.trim();
 }
 
 export function reducer(state: DemoState, action: Action): DemoState {
@@ -646,7 +734,9 @@ export function reducer(state: DemoState, action: Action): DemoState {
         next.notice = blocked;
         return next;
       }
-      next.units[action.unitId].status = "passed";
+      const unit = next.units[action.unitId];
+      unit.status = "passed";
+      applyComment(unit, action.comment);
       next.notice = "已标记通过。这不是证书。";
       return next;
     }
@@ -660,7 +750,25 @@ export function reducer(state: DemoState, action: Action): DemoState {
       unit.status = "needs_revision";
       unit.redoFloor = unit.executeSeq;
       unit.suggestion = null;
-      next.notice = `已请学生修改${unitShort(action.unitId)}。已经计入的回流不扣。`;
+      applyComment(unit, action.comment);
+      next.notice = `已请学生修改${unitShort(action.unitId)}。已经计入的回流不扣。评论不计回流。`;
+      return next;
+    }
+    case "save_unit_config": {
+      const title = action.config.title.trim();
+      const notes = action.config.notes.trim();
+      const requirement = action.config.requirement.trim();
+      if (!title || !notes || !requirement) {
+        next.notice = "标题、说明和要求都要填写。";
+        return next;
+      }
+      next.configs[action.key] = {
+        title,
+        notes,
+        requirement,
+        duanyanRequired: action.config.duanyanRequired,
+      };
+      next.notice = "已保存这一节的说明（演示／Mock）。配置不计回流。";
       return next;
     }
     case "create_template":

@@ -1,6 +1,5 @@
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { CourseHeader } from "../components/CourseHeader";
-import { TeacherView } from "./TeacherView";
 import {
   COURSE_TITLE,
   TEACHER_NAME,
@@ -22,18 +21,12 @@ function assignmentEntry(status: SlotStatus, step: PracticeStep) {
 
 export function CourseHomePage() {
   const { state, dispatch } = useCourse();
-  const [params] = useSearchParams();
-  const wantTeacher = params.get("view") === "teacher";
-
-  if (wantTeacher && state.role === "teacher") return <TeacherView />;
-
   const missing = missingAssignments(state);
   const started = (["a2", "a3", "a4"] as const).some((id) => state.units[id].slotText);
 
   return (
     <article>
       <CourseHeader />
-      {wantTeacher ? <p className="quiet">当前是学员。要看布置和反馈，请在页脚换成老师。</p> : null}
       <p className="kicker">生医 · {TEACHER_NAME}</p>
       <h1>{COURSE_TITLE}</h1>
       <p className="lede">课题：{TOPIC_TITLE}</p>
@@ -48,7 +41,7 @@ export function CourseHomePage() {
           <span className="mark">①</span>
           <div>
             <h2>教学课时</h2>
-            <p>结合之后，活化信号怎么画。</p>
+            <p>{state.configs.lesson.notes}</p>
             <p data-testid="status-lesson">状态：{lessonLabel(state.lessonRead)}</p>
             <Link to={paths.lesson}>阅读</Link>
           </div>
@@ -57,7 +50,7 @@ export function CourseHomePage() {
           <span className="mark">Q1</span>
           <div>
             <h2>测验 · 课内检查</h2>
-            <p>纸面两题用来回忆。短实训在端砚里做，回到这一节。</p>
+            <p>{state.configs.q1.notes}</p>
             <p data-testid="status-q1">状态：{statusLabel(state.units.q1.status)}</p>
             <Link to={paths.quiz}>开始测验</Link>
           </div>
@@ -66,7 +59,7 @@ export function CourseHomePage() {
           <span className="mark">②</span>
           <div>
             <h2>作业 · 课题与 Agent 界定</h2>
-            <p>打开本课课题，写出可检验的问题界定。</p>
+            <p>{state.configs.a2.notes}</p>
             <p data-testid="status-a2">状态：{statusLabel(state.units.a2.status)}</p>
             {assignmentEntry(state.units.a2.status, 2)}
           </div>
@@ -75,7 +68,7 @@ export function CourseHomePage() {
           <span className="mark">③</span>
           <div>
             <h2>作业 · Agent 论文</h2>
-            <p>写大纲中的一段，并给出引用主张。</p>
+            <p>{state.configs.a3.notes}</p>
             <p data-testid="status-a3">状态：{statusLabel(state.units.a3.status)}</p>
             {assignmentEntry(state.units.a3.status, 3)}
           </div>
@@ -84,7 +77,7 @@ export function CourseHomePage() {
           <span className="mark">④</span>
           <div>
             <h2>作业 · 图生</h2>
-            <p>为同一课题放一张机制示意。</p>
+            <p>{state.configs.a4.notes}</p>
             <p data-testid="status-a4">状态：{statusLabel(state.units.a4.status)}</p>
             {assignmentEntry(state.units.a4.status, 4)}
           </div>

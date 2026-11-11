@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Sketch } from "../components/Sketch";
-import { promptDraft, unitShort, unitTitle } from "../domain/content";
+import { promptDraft, unitShort } from "../domain/content";
 import { TOPIC_TITLE, paths, parseUnit, returnBlock, unitPath } from "../domain/model";
 import { useCourse } from "../store";
 import { wait } from "../delay";
@@ -60,7 +60,7 @@ export function StudioPage() {
         <span>端砚</span>
       </p>
       <p className="kicker">端砚</p>
-      <h1>{unitTitle(id)}</h1>
+      <h1>{state.configs[id].title}</h1>
       <p data-testid="duanyan-topic">课题：{TOPIC_TITLE}</p>
       <section>
         <h2>草案</h2>
