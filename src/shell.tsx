@@ -1,92 +1,39 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { copy, type Role } from "./domain/logic";
+import { useEffect, useRef } from "react";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { isPracticeId } from "./domain/content";
+import { latestSubmission, type Role } from "./domain/logic";
 import { useDemo } from "./store";
-
-const ROLES: { id: Role; label: string }[] = [
-  { id: "student", label: "学生" },
-  { id: "teacher", label: "老师" },
-  { id: "reviewer", label: "评审" },
-];
-
-export function MockTag() {
-  return <span className="tag">演示／Mock</span>;
-}
-
+import { Icon, InkLogo } from "./components/icons";
 export function Shell() {
   const { state, dispatch } = useDemo();
-  const navigate = useNavigate();
-
-  function choose(role: Role) {
-    dispatch({ type: "set_role", role });
-    navigate(role === "student" ? "/catalog" : "/teacher/courses");
+  const location = useLocation(), navigate = useNavigate();
+  const mainRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    mainRef.current?.focus({ preventScroll: true });
+  }, [location.pathname]);
+  useEffect(() => {
+    if (!state.notice) return;
+    const timer = setTimeout(() => dispatch({ type: "clear_notice" }), state.notice.tone === "error" ? 8000 : 5000);
+    return () => clearTimeout(timer);
+  }, [state.notice, dispatch]);
+  function switchRole(role: Role) {
+    dispatch({ type: "role", role });
+    const match = location.pathname.match(/\/(?:unit|studio|review)\/(q1|a1|a2|a3)/);
+    const unit = match?.[1];
+    if (role === "teacher") navigate(unit && isPracticeId(unit) && latestSubmission(state, unit) ? "/course/review/" + unit : "/course/teacher");
+    else navigate(unit && isPracticeId(unit) ? "/course/unit/" + unit : "/course");
   }
-
-  function reset() {
-    dispatch({ type: "reset" });
-    navigate("/catalog");
-  }
-
-  const student = state.role === "student";
-  const reviewer = state.role === "reviewer";
-
-  return (
-    <div className="app">
-      <p className="banner">{copy.banner}</p>
-      <header className="top">
-        <div>
-          <p className="eyebrow">课壳 ＋ 轻量 LMS ＋ 端砚薄入口</p>
-          <strong className="brand">生医示例课 Demo</strong>
-        </div>
-        <div className="roles" role="group" aria-label="角色切换">
-          {ROLES.map((role) => (
-            <button
-              key={role.id}
-              type="button"
-              data-testid={`role-${role.id}`}
-              aria-pressed={state.role === role.id}
-              onClick={() => choose(role.id)}
-            >
-              {role.label}
-            </button>
-          ))}
-        </div>
-      </header>
-      <nav className="nav" aria-label="页面">
-        {(student || reviewer) && (
-          <NavLink to="/catalog" data-testid="nav-catalog">
-            课表
-          </NavLink>
-        )}
-        {student && (
-          <NavLink to="/course" data-testid="nav-course">
-            课首页
-          </NavLink>
-        )}
-        {!student && (
-          <>
-            <NavLink to="/teacher/courses">我的课</NavLink>
-            <NavLink to="/teacher/template">选用模板</NavLink>
-            <NavLink to="/teacher/assign">布置与发布</NavLink>
-            <NavLink to="/teacher/progress">班级进度</NavLink>
-            <NavLink to="/teacher/review/lin-ke">抽检</NavLink>
-            <NavLink to="/metrics" data-testid="nav-metrics">
-              看板
-            </NavLink>
-          </>
-        )}
-      </nav>
-      <p className="notice" role="status" data-testid="notice">
-        {state.notice ?? ""}
-      </p>
-      <main>
-        <Outlet />
-      </main>
-      <footer>
-        <p>「打开端砚（演示）」只在本站切到薄执行页。没有登录，没有后端，没有真实客户端跳转。</p>
-        <button type="button" data-testid="reset-demo" onClick={reset}>
-          重置演示数据
-        </button>
-      </footer>
-    </div>
-  );
+  const teacher = state.role === "teacher";
+  return <div className="app-shell">
+    <a className="skip-link" href="#main-content" onClick={(event) => { event.preventDefault(); mainRef.current?.focus(); }}>跳到主要内容</a>
+    <header className="site-header"><div className="header-inner">
+      <Link to="/course" className="brand" aria-label="端砚学院，课程首页"><InkLogo /><span>端砚学院<span className="brand-en">DUANYAN ACADEMY</span></span></Link>
+      <nav className="primary-navigation" aria-label="主导航"><NavLink to="/courses">课程</NavLink><NavLink to="/course" end>当前课程</NavLink></nav>
+      <div className="header-account"><button type="button" className="view-switch" data-testid={teacher ? "role-student" : "role-teacher"} onClick={() => switchRole(teacher ? "student" : "teacher")}><Icon name={teacher ? "book" : "users"} size={16} />{teacher ? "以学员查看" : "教师视图"}</button><span className="account-divider" /><span className="avatar avatar-small">{teacher ? "周" : "林"}</span><span className="account-name">{teacher ? "周衡" : "林可"}</span></div>
+    </div></header>
+    <main id="main-content" ref={mainRef} tabIndex={-1}><Outlet /></main>
+    <footer className="site-footer"><div className="footer-inner"><div className="footer-brand"><InkLogo /><span>让研究，从实践开始。</span></div><p>前端演示 · 课程、产物与轨迹为 Mock；未连接真实模型或端砚服务。</p><div className="footer-actions"><Link to="/enter">校验入课</Link><button type="button" onClick={() => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.()}><Icon name="fullscreen" size={14} />全屏</button><details className="demo-settings"><summary>演示设置<Icon name="down" size={12} /></summary><div className="settings-popover"><strong>演示数据</strong><p>进度仅保存在当前浏览器。</p><button type="button" onClick={() => dispatch({ type: "load_sample" })}>补齐完整提交样例</button><button data-testid="reset-demo" type="button" onClick={() => { if (window.confirm("重置当前浏览器中的课程演示进度？")) { dispatch({ type: "reset" }); navigate("/course"); } }}>重置课程进度</button><button type="button" onClick={() => switchRole(teacher ? "student" : "teacher")}>{teacher ? "切回学员" : "切换教师视图"}</button></div></details></div></div></footer>
+    {state.notice && <div className={"toast toast-" + state.notice.tone} role={state.notice.tone === "error" ? "alert" : "status"} data-testid="notice"><Icon name={state.notice.tone === "error" ? "info" : state.notice.tone === "success" ? "check" : "info"} size={19} /><span>{state.notice.message}</span><button aria-label="关闭提示" onClick={() => dispatch({ type: "clear_notice" })}><Icon name="close" size={16} /></button></div>}
+  </div>;
 }

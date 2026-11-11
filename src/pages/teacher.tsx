@@ -1,267 +1,51 @@
-import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import {
-  COURSE_TITLE,
-  INVITE_CODE,
-  STEPS,
-  STUDENT_ID,
-  STUDENT_NAME,
-  TEACHER_NAME,
-  courseStatusLabel,
-  eventKindLabel,
-  isPracticeStep,
-  progressLabel,
-  slotLabel,
-  stepEvidence,
-  type PracticeStep,
-} from "../domain/logic";
-import { MockFigure } from "./student";
-import { MockTag } from "../shell";
-import { useDelayedDispatch, useDemo } from "../store";
+import { useEffect, useState } from "react";
+import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
+import { ASSIGNMENT_IDS, COURSE_TITLE, PRACTICE_IDS, STUDENT_NAME, TOPIC_ID, UNITS, isPracticeId, unitOf } from "../domain/content";
+import { bundleComplete, currentStage, hasEvidence, latestSubmission, statusLabel } from "../domain/logic";
+import { useDelayedAction, useDemo } from "../store";
+import { Breadcrumb, Status, TextArtifact, Timeline, UnitEvidenceSummary } from "../components/common";
+import { Icon } from "../components/icons";
+import { MechanismFigure } from "../components/visuals";
 
-export function TeacherCoursesPage() {
-  const { state } = useDemo();
-  return (
-    <section>
-      <h1>我的课</h1>
-      <p className="lead">
-        老师从课实例进入布置、进度和抽检。
-        {state.role === "reviewer" && "评审走查从选用模板开始，发布后再切到学生。"}
-        <MockTag />
-      </p>
-      {state.coursePhase === "none" ? (
-        <div className="note">
-          <p>还没有课实例。</p>
-          <Link to="/teacher/template">去选用生医 6 步模板</Link>
-        </div>
-      ) : (
-        <article className="card">
-          <p className="status">{courseStatusLabel(state)}</p>
-          <h2>{COURSE_TITLE}</h2>
-          <p>教师：{TEACHER_NAME}</p>
-          <div className="actions">
-            <Link to="/teacher/template">查看模板预填</Link>
-            <Link to="/teacher/assign">布置与发布</Link>
-            <Link to="/teacher/progress">班级进度</Link>
-            <Link to={`/teacher/review/${STUDENT_ID}`}>抽检</Link>
-          </div>
-        </article>
-      )}
-    </section>
-  );
-}
-
-export function TemplatePage() {
-  const { state, dispatch } = useDemo();
-  return (
-    <section>
-      <h1>选用模板</h1>
-      <p className="lead">
-        一键生成生医 6 步课实例。路径和通关条件是模板预填，只读。这里没有创作台。
-        <MockTag />
-      </p>
-      <button
-        type="button"
-        data-testid="generate-template"
-        onClick={() => dispatch({ type: "generate_template" })}
-        disabled={state.coursePhase !== "none"}
-      >
-        {state.coursePhase === "none" ? "选用生医 6 步模板，生成课实例" : "课实例已生成"}
-      </button>
-      <p>当前：{courseStatusLabel(state)}</p>
-      <ol className="steps">
-        {STEPS.map((step) => (
-          <li key={step.n}>
-            <div>
-              <strong>
-                {step.n}. {step.title}
-              </strong>
-              <p>{step.passNote}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
-export function AssignPage() {
-  const { state, dispatch } = useDemo();
-  return (
-    <section>
-      <h1>布置与发布</h1>
-      <p className="lead">
-        生成邀请码，或导入一份 Mock 名单。未挂强制实训时，发布会被阻断。
-        <MockTag />
-      </p>
-      {state.coursePhase === "none" && (
-        <p>
-          请先<Link to="/teacher/template">生成课实例</Link>。
-        </p>
-      )}
-      <div className="actions">
-        <button type="button" data-testid="generate-invite" onClick={() => dispatch({ type: "generate_invite" })}>
-          生成邀请码
-        </button>
-        <button type="button" data-testid="import-roster" onClick={() => dispatch({ type: "import_roster" })}>
-          导入 Mock 名单
-        </button>
-      </div>
-      <p data-testid="invite-code">{state.inviteCode ? `邀请码：${state.inviteCode}` : "还没有邀请码"}</p>
-      <p data-testid="roster-list">{state.roster.length ? `名单：${state.roster.join("、")}` : "还没有名单"}</p>
-      <label className="switch">
-        <input
-          type="checkbox"
-          data-testid="detach-practice"
-          checked={!state.practiceAttached}
-          onChange={(event) => dispatch({ type: "set_practice_attached", attached: !event.target.checked })}
-        />
-        演示反例：卸下强制实训步骤
-      </label>
-      <p>模板默认已经挂上步骤②③④。这个开关只用来演示「没有实训就不能发布」，不是在改课结构。</p>
-      <button type="button" data-testid="publish" onClick={() => dispatch({ type: "publish" })}>
-        发布
-      </button>
-      <p className="hint">演示码固定为 {INVITE_CODE}。学生页不会预先填上它。</p>
-    </section>
-  );
-}
-
-export function ProgressPage() {
-  const { state } = useDemo();
-  return (
-    <section>
-      <h1>班级进度</h1>
-      <p className="lead">
-        只看谁进入了路径、谁有课题、谁待抽检、通过或补做。这不是成绩册。
-        <MockTag />
-      </p>
-      <table>
-        <thead>
-          <tr>
-            <th>学生</th>
-            <th>路径状态</th>
-            <th>课题</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <Link to={`/teacher/review/${STUDENT_ID}`}>{STUDENT_NAME}</Link>
-            </td>
-            <td data-testid="class-status">{progressLabel(state.studentPhase)}</td>
-            <td>{state.topic ? state.topic.title : "还没有课题"}</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-  );
-}
-
-export function ReviewPage() {
-  const { id } = useParams();
-  const { state } = useDemo();
-  const { busy, dispatch, later } = useDelayedDispatch();
-  const [redoStep, setRedoStep] = useState<PracticeStep>(2);
-  const note = state.evalBySubmission[state.submissionId];
-  const pending = state.studentPhase === "pending_review";
-
-  if (id !== STUDENT_ID) {
-    return (
-      <section>
-        <h1>没有这份抽检</h1>
-        <p>本 Demo 只有一位学生的 Mock 轨迹。</p>
-        <Link to="/teacher/progress">回班级进度</Link>
-      </section>
-    );
+function AssignmentSetup() {
+  const { state, dispatch } = useDemo(), draft = state.courseDraft;
+  const [copied, setCopied] = useState(false);
+  async function copyInvite() {
+    try { await navigator.clipboard.writeText(draft.invite); setCopied(true); setTimeout(() => setCopied(false), 2000); }
+    catch { dispatch({ type: "notice", message: "邀请码：" + draft.invite + "。当前浏览器未开放剪贴板，可直接选中文字复制。" }); }
   }
-
-  return (
-    <section>
-      <h1>抽检</h1>
-      <p className="lead">
-        {STUDENT_NAME} · {progressLabel(state.studentPhase)}
-        {state.topic ? ` · ${state.topic.title}` : ""}
-        <MockTag />
-      </p>
-      <p>AI 辅助评估只给建议。通过或补做必须老师自己点。这里不打分。</p>
-      <div className="split">
-        <div>
-          <h2>产物</h2>
-          {([2, 3, 4] as PracticeStep[]).map((step) => {
-            const slot = state.slots[step];
-            const title = STEPS.find((item) => item.n === step)?.title;
-            return (
-              <article key={step} className="note" data-testid={`review-slot-${step}`}>
-                <h3>
-                  {title} · {slotLabel(slot.status)}
-                </h3>
-                {slot.artifact ? <pre>{slot.artifact}</pre> : <p>作业位还没有产物。</p>}
-                {slot.figure && slot.artifact && <MockFigure caption={slot.artifact} />}
-                {stepEvidence(state, step) && <p>这一步同时有作业位产物和回传事件（演示／Mock）。</p>}
-              </article>
-            );
-          })}
-        </div>
-        <div>
-          <h2>轨迹时间线</h2>
-          {state.events.length === 0 ? (
-            <p>还没有轨迹事件。只打开端砚不会出现在这里。</p>
-          ) : (
-            <ol data-testid="timeline">
-              {state.events.map((event) => (
-                <li key={event.id}>
-                  <strong>{eventKindLabel(event.kind)}</strong>
-                  <span>{event.counted ? "计入" : "不计入"}</span>
-                  <p>{event.summary}</p>
-                </li>
-              ))}
-            </ol>
-          )}
-        </div>
-      </div>
-      {note && (
-        <div className="note" data-testid="eval-note">
-          <h2>AI 辅助评估建议</h2>
-          <p>{note.tendency}。不自动裁定。</p>
-          <ul>
-            {note.reasons.map((reason) => (
-              <li key={reason}>{reason}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <div className="actions">
-        <button type="button" data-testid="arm-failure" onClick={() => dispatch({ type: "arm_failure" })}>
-          模拟本次失败（演示）
-        </button>
-        <button type="button" data-testid="eval" disabled={busy} onClick={() => later({ type: "eval" })}>
-          AI 辅助评估（演示）
-        </button>
-        <button type="button" data-testid="pass" disabled={!pending} onClick={() => dispatch({ type: "pass" })}>
-          通过
-        </button>
-      </div>
-      {busy && <p>正在写演示建议…</p>}
-      <div className="actions">
-        <label htmlFor="redo-step">补做步骤</label>
-        <select
-          id="redo-step"
-          data-testid="redo-step"
-          value={redoStep}
-          onChange={(event) => {
-            const value = Number(event.target.value);
-            if (isPracticeStep(value)) setRedoStep(value);
-          }}
-        >
-          <option value={2}>② 问题界定</option>
-          <option value={3}>③ 论文段落</option>
-          <option value={4}>④ 图生</option>
-        </select>
-        <button type="button" data-testid="redo" disabled={!pending} onClick={() => dispatch({ type: "redo", step: redoStep })}>
-          打回补做
-        </button>
-      </div>
-    </section>
-  );
+  return <div className="setup-grid"><section className="setup-section"><div className="section-heading"><h2>从现有模板开始</h2>{draft.created && <span className="muted-tag">{draft.phase === "published" ? "已发布" : draft.phase === "assigned" ? "已布置" : "草稿"}</span>}</div><p>沿用生医课的内容结构和同一课题。先选用模板，再决定如何让学员进入。</p><div className="template-preview"><Icon name="book" size={27} /><div><h3>生医 · PD-1／PD-L1 研究入门</h3><p>1 课时、1 测验、3 份强制作业、1 项选读</p></div></div><button className="button secondary" data-testid="generate-template" onClick={() => dispatch({ type: "template" })}>{draft.created ? "课程草稿已生成" : "选用模板，生成课实例"}<Icon name={draft.created ? "check" : "copy"} size={16} /></button>
+    {draft.created && <section className="draft-structure"><h3>课内内容与通关条件</h3><p className="small-note">教学、测验和选读随模板预填；三份强制作业需要完整挂载。</p><ul>{UNITS.map((unit) => <li key={unit.id}>{unit.kind === "assignment" ? <label><input type="checkbox" checked={draft.attached[unit.id as "a1" | "a2" | "a3"]} disabled={draft.phase === "published"} data-testid={"attach-" + unit.id} onChange={(event) => dispatch({ type: "draft_attach", unit: unit.id as "a1" | "a2" | "a3", value: event.target.checked })} /><span>{unit.label} · {unit.shortTitle}</span></label> : <span className="prefilled-unit"><Icon name="check" size={15} />{unit.label} · {unit.shortTitle}<small>预填</small></span>}</li>)}</ul><details><summary>查看原模板映射<Icon name="down" size={13} /></summary>{UNITS.map((unit) => <p className="small-note" key={unit.id}>{unit.label}：{unit.sourceStep}</p>)}<p className="small-note">⑥ 系统预检：②—④ 产物与事件齐套后进入待老师反馈。Q1 单独回传，不替代三份作业。</p></details></section>}</section>
+      <section className="setup-section access-setup"><h2>布置给学员</h2><p>使用邀请码或名单；本演示支持固定的入课样例。</p><div className="access-option"><div><Icon name="link" size={20} /><h3>通过邀请码进入</h3></div><p>生成课程邀请码，发给本课学员。</p><button className="button secondary" disabled={!draft.created} data-testid="generate-invite" onClick={() => dispatch({ type: "invite" })}>{draft.invite ? "邀请码已生成" : "生成邀请码"}</button>{draft.invite && <div className="invite-result"><code data-testid="invite-code">{draft.invite}</code><button className="icon-button" aria-label="复制邀请码" onClick={copyInvite}><Icon name={copied ? "check" : "copy"} size={16} /></button></div>}</div><div className="access-option"><div><Icon name="users" size={20} /><h3>通过名单进入</h3></div><p>导入本次演示的样例名单。</p><button className="button secondary" disabled={!draft.created} data-testid="import-roster" onClick={() => dispatch({ type: "roster" })}>{draft.roster.length ? "名单已导入" : "导入样例名单"}</button>{draft.roster.length > 0 && <p className="roster-confirmation" data-testid="roster-list"><Icon name="check" size={15} />林可 · Mock 学员</p>}</div><div className="publish-section"><p>发布时会检查三份强制作业是否完整。课程草稿的操作不会清空已学课程的进度。</p><button className="button primary" disabled={!draft.created || draft.phase === "published"} data-testid="publish" onClick={() => dispatch({ type: "publish" })}>{draft.phase === "published" ? "课程已发布" : "发布课程"}<Icon name={draft.phase === "published" ? "check" : "arrow"} size={16} /></button>{draft.phase === "published" && <Link className="text-link" to="/enter">查看学员入口<Icon name="arrow" size={15} /></Link>}</div></section>
+  </div>;
+}
+function ClassProgress() {
+  const { state, dispatch } = useDemo();
+  const pending = PRACTICE_IDS.filter((id) => state.units[id].status === "pending").length;
+  const submitted = PRACTICE_IDS.filter((id) => hasEvidence(state, id)).length;
+  return <section className="class-progress"><div className="teacher-progress-heading"><div><h2>这门课，学到哪里了</h2><p>在每份提交中查看产物、执行记录与需要跟进的反馈。</p></div><span className="class-label">生医试点班 · Mock</span></div><div className="sample-actions"><span>可用完整提交样例，直接体验反馈与修改流程。</span><button className="button secondary" data-testid="load-complete-sample" onClick={() => dispatch({ type: "load_sample" })}>载入完整提交样例<Icon name="arrow" size={15} /></button></div><div className="learner-overview"><span className="avatar avatar-large">林</span><div><h3>{STUDENT_NAME}</h3><p>{currentStage(state)}</p></div><div className="learner-summary"><span>{submitted} 份产物已交</span><span>{pending} 份待反馈</span></div></div><div className="table-scroll"><table className="submission-table"><thead><tr><th>课程单元</th><th>课题与提交</th><th>当前状态</th><th><span className="sr-only">查看提交</span></th></tr></thead><tbody><tr><td><span className="table-unit-label">课时 01</span><strong>从通路到科学问题</strong></td><td>教学阅读</td><td>{state.lessonRead ? "已读" : "未开始"}</td><td><Link to="/course/unit/lesson">查看讲义<Icon name="chevron" size={15} /></Link></td></tr>{PRACTICE_IDS.map((id) => {
+    const submission = latestSubmission(state, id);
+    return <tr key={id}><td><span className="table-unit-label">{unitOf(id).label}</span><strong>{unitOf(id).shortTitle}</strong></td><td>{submission ? <><span>{TOPIC_ID}</span><small>第 {submission.revision} 次提交</small></> : <span className="muted">等待学员回传</span>}</td><td><Status value={state.units[id].status} /></td><td>{submission ? <Link to={"/course/review/" + id} data-testid={"review-" + id}>查看与反馈<Icon name="chevron" size={15} /></Link> : <span className="muted">尚无提交</span>}</td></tr>;
+  })}</tbody></table></div><div className="teacher-gate-note"><Icon name={bundleComplete(state) ? "check" : "info"} size={17} /><p>{bundleComplete(state) ? "问题界定、论文、机制图已齐套。可以在对应提交中逐份反馈。" : "问题界定、论文、机制图三份作业齐套后，才进入待老师反馈。Q1 的回传与反馈单独进行。"}{!bundleComplete(state) && <span> 尚缺：{ASSIGNMENT_IDS.filter((id) => !hasEvidence(state, id) || state.units[id].status === "redo").map((id) => unitOf(id).label).join("、")}。</span>}</p></div></section>;
+}
+export function TeacherPage() {
+  const { state } = useDemo();
+  const [params, setParams] = useSearchParams();
+  const setup = params.get("tab") === "setup";
+  if (state.role !== "teacher") return <Navigate to="/course" replace />;
+  return <div className="page teacher-page"><Breadcrumb current="教师视图" /><header className="teacher-page-heading"><div><h1>{COURSE_TITLE}</h1><p>教师视图 · 从一门课，看到每一次研究实践。</p></div><Link className="text-link" to="/course/evidence">回流说明<Icon name="arrow" size={15} /></Link></header><nav className="course-tabs" aria-label="课程教师视图"><button aria-pressed={!setup} onClick={() => setParams({})}>班级进度</button><button aria-pressed={setup} onClick={() => setParams({ tab: "setup" })}>布置与发布</button></nav>{setup ? <AssignmentSetup /> : <ClassProgress />}</div>;
+}
+export function ReviewPage() {
+  const { unit: param } = useParams();
+  const { state, dispatch } = useDemo();
+  const { busy, run } = useDelayedAction();
+  const [comment, setComment] = useState("");
+  useEffect(() => { setComment(""); }, [param]);
+  if (!param || !isPracticeId(param)) return <Navigate to="/course/teacher" replace />;
+  const id = param, unit = unitOf(id), work = state.units[id], submission = latestSubmission(state, id);
+  if (state.role !== "teacher") return <Navigate to={"/course/unit/" + id} replace />;
+  if (!submission) return <div className="page"><Breadcrumb current="提交反馈" /><div className="locked-unit"><Icon name="file" size={30} /><h1>还没有这份提交</h1><p>学员回传产物后，可在这里查看。</p><Link className="button primary" to="/course/teacher">返回班级进度</Link></div></div>;
+  const feedbackEnabled = work.status === "pending" && (id === "q1" || ASSIGNMENT_IDS.every((other) => hasEvidence(state, other))) && hasEvidence(state, id);
+  return <div className="page review-page"><Breadcrumb current="提交反馈" /><Link className="text-link review-back" to="/course/teacher"><Icon name="back" size={15} />返回班级进度</Link><header className="review-heading"><div><div className="unit-meta"><span>{unit.label}</span><span>{STUDENT_NAME} · 第 {submission.revision} 次提交</span></div><h1>{unit.shortTitle}</h1><p>{state.topicTitle}</p></div><Status value={work.status} /></header><div className="review-grid"><article className="review-artifact"><div className="section-heading"><h2>学员产物</h2><UnitEvidenceSummary unit={id} /></div>{submission.figure && <MechanismFigure />}<TextArtifact text={submission.artifact} /><div className="artifact-metadata"><span>课题 {TOPIC_ID}</span><span>提交 {submission.id}</span></div></article><aside className="review-controls"><section className="feedback-composer"><h2>给这次提交反馈</h2><p>先看产物与执行记录，再确认通过或写下修改方向。</p><label htmlFor="teacher-comment">反馈意见</label><textarea id="teacher-comment" data-testid="teacher-comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder="例如：请区分机制研究与早期临床观察，并补齐主张对应的 DOI。" rows={4} /><div className="feedback-actions"><button className="button primary" data-testid="pass" disabled={!feedbackEnabled || busy} onClick={() => dispatch({ type: "feedback", unit: id, decision: "passed", comment })}><Icon name="check" size={16} />通过</button><button className="button secondary" data-testid="redo" disabled={!feedbackEnabled || busy} onClick={() => dispatch({ type: "feedback", unit: id, decision: "redo", comment })}>请修改</button></div>{!feedbackEnabled && <p className="small-note">{work.status === "passed" || work.status === "redo" ? "本次反馈已发送；新版本回传后可再次反馈。" : "三份强制作业尚未齐套，暂不能裁定。可以先查看产物与 AI 建议。"}</p>}{!feedbackEnabled && work.status === "returned" && <button className="button secondary" data-testid="fill-review-sample" onClick={() => dispatch({ type: "load_sample" })}>补齐其余作业样例<Icon name="arrow" size={14} /></button>}{submission.feedback && <div className="previous-feedback"><strong>{submission.decision === "passed" ? "已发送：通过" : "已发送：请修改"}</strong><p>{submission.feedback}</p></div>}</section>
+      <section className="ai-evaluation"><div className="section-heading"><h2><Icon name="spark" size={18} />AI 辅助评估</h2><span className="muted-tag">建议</span></div>{busy ? <div className="evaluation-loading" role="status"><div className="skeleton-lines"><span /><span /><span /></div><p>正在整理本次提交的建议…</p></div> : submission.evaluation ? <div className="evaluation-note" data-testid="eval-note"><strong>{submission.evaluation.tendency}</strong><ul>{submission.evaluation.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul></div> : <p>生成建议要点，帮助定位值得检查的地方。</p>}<button className="button secondary" data-testid="eval" disabled={busy} onClick={() => run({ type: "evaluate", unit: id })}><Icon name="spark" size={16} />{submission.evaluation ? "查看本次建议" : "生成评估建议（演示）"}</button><p className="small-note">只提供建议，不打分、不自动裁定。</p><details className="failure-settings"><summary>异常演示<Icon name="down" size={12} /></summary><button data-testid="fail-eval" onClick={() => dispatch({ type: "fail_next", operation: "evaluate" })}>下次评估失败</button></details></section></aside></div><section className="review-timeline"><div className="section-heading"><h2>这份{unit.kind === "quiz" ? "测验" : "作业"}的执行记录</h2><span>{TOPIC_ID} · Mock</span></div><Timeline showCounts events={state.events.filter((event) => event.unit === id)} /></section><nav className="review-unit-links" aria-label="查看其他提交">{PRACTICE_IDS.filter((other) => other !== id && hasEvidence(state, other)).map((other) => <Link key={other} to={"/course/review/" + other}>{unitOf(other).label} · {statusLabel(state.units[other].status)}<Icon name="chevron" size={14} /></Link>)}</nav></div>;
 }

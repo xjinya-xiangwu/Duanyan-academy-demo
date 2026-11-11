@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-11T10:25:47.438Z",
+  "title": "Design System: 端砚学院 Demo",
+  "extensions": {
+    "colorMeta": {
+      "canvas": {
+        "role": "neutral",
+        "displayName": "米白画布",
+        "tonalRamp": [
+          "oklch(15.00% 0.00539 95.10)",
+          "oklch(26.43% 0.00539 95.10)",
+          "oklch(37.86% 0.00539 95.10)",
+          "oklch(49.29% 0.00539 95.10)",
+          "oklch(60.71% 0.00539 95.10)",
+          "oklch(72.14% 0.00539 95.10)",
+          "oklch(83.57% 0.00539 95.10)",
+          "oklch(95.00% 0.00539 95.10)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "浅纸面",
+        "tonalRamp": [
+          "oklch(15.00% 0.00409 91.45)",
+          "oklch(26.43% 0.00409 91.45)",
+          "oklch(37.86% 0.00409 91.45)",
+          "oklch(49.29% 0.00409 91.45)",
+          "oklch(60.71% 0.00409 91.45)",
+          "oklch(72.14% 0.00409 91.45)",
+          "oklch(83.57% 0.00409 91.45)",
+          "oklch(95.00% 0.00409 91.45)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "墨绿正文",
+        "tonalRamp": [
+          "oklch(15.00% 0.02964 159.73)",
+          "oklch(26.43% 0.02964 159.73)",
+          "oklch(37.86% 0.02964 159.73)",
+          "oklch(49.29% 0.02964 159.73)",
+          "oklch(60.71% 0.02964 159.73)",
+          "oklch(72.14% 0.02964 159.73)",
+          "oklch(83.57% 0.02964 159.73)",
+          "oklch(95.00% 0.02964 159.73)"
+        ]
+      },
+      "heading": {
+        "role": "neutral",
+        "displayName": "深绿标题",
+        "tonalRamp": [
+          "oklch(15.00% 0.05405 162.24)",
+          "oklch(26.43% 0.05405 162.24)",
+          "oklch(37.86% 0.05405 162.24)",
+          "oklch(49.29% 0.05405 162.24)",
+          "oklch(60.71% 0.05405 162.24)",
+          "oklch(72.14% 0.05405 162.24)",
+          "oklch(83.57% 0.05405 162.24)",
+          "oklch(95.00% 0.05405 162.24)"
+        ]
+      },
+      "green": {
+        "role": "primary",
+        "displayName": "深林绿",
+        "tonalRamp": [
+          "oklch(15.00% 0.05879 164.91)",
+          "oklch(26.43% 0.05879 164.91)",
+          "oklch(37.86% 0.05879 164.91)",
+          "oklch(49.29% 0.05879 164.91)",
+          "oklch(60.71% 0.05879 164.91)",
+          "oklch(72.14% 0.05879 164.91)",
+          "oklch(83.57% 0.05879 164.91)",
+          "oklch(95.00% 0.05879 164.91)"
+        ]
+      },
+      "green-hover": {
+        "role": "primary",
+        "displayName": "悬停深绿",
+        "tonalRamp": [
+          "oklch(15.00% 0.07292 162.79)",
+          "oklch(26.43% 0.07292 162.79)",
+          "oklch(37.86% 0.07292 162.79)",
+          "oklch(49.29% 0.07292 162.79)",
+          "oklch(60.71% 0.07292 162.79)",
+          "oklch(72.14% 0.07292 162.79)",
+          "oklch(83.57% 0.07292 162.79)",
+          "oklch(95.00% 0.07292 162.79)"
+        ]
+      },
+      "green-tint": {
+        "role": "primary",
+        "displayName": "浅叶绿",
+        "tonalRamp": [
+          "oklch(15.00% 0.01426 128.63)",
+          "oklch(26.43% 0.01426 128.63)",
+          "oklch(37.86% 0.01426 128.63)",
+          "oklch(49.29% 0.01426 128.63)",
+          "oklch(60.71% 0.01426 128.63)",
+          "oklch(72.14% 0.01426 128.63)",
+          "oklch(83.57% 0.01426 128.63)",
+          "oklch(95.00% 0.01426 128.63)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "灰绿辅助字",
+        "tonalRamp": [
+          "oklch(15.00% 0.02940 139.82)",
+          "oklch(26.43% 0.02940 139.82)",
+          "oklch(37.86% 0.02940 139.82)",
+          "oklch(49.29% 0.02940 139.82)",
+          "oklch(60.71% 0.02940 139.82)",
+          "oklch(72.14% 0.02940 139.82)",
+          "oklch(83.57% 0.02940 139.82)",
+          "oklch(95.00% 0.02940 139.82)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "纸灰分隔",
+        "tonalRamp": [
+          "oklch(15.00% 0.01507 119.12)",
+          "oklch(26.43% 0.01507 119.12)",
+          "oklch(37.86% 0.01507 119.12)",
+          "oklch(49.29% 0.01507 119.12)",
+          "oklch(60.71% 0.01507 119.12)",
+          "oklch(72.14% 0.01507 119.12)",
+          "oklch(83.57% 0.01507 119.12)",
+          "oklch(95.00% 0.01507 119.12)"
+        ]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "浅灰底",
+        "tonalRamp": [
+          "oklch(15.00% 0.01191 106.62)",
+          "oklch(26.43% 0.01191 106.62)",
+          "oklch(37.86% 0.01191 106.62)",
+          "oklch(49.29% 0.01191 106.62)",
+          "oklch(60.71% 0.01191 106.62)",
+          "oklch(72.14% 0.01191 106.62)",
+          "oklch(83.57% 0.01191 106.62)",
+          "oklch(95.00% 0.01191 106.62)"
+        ]
+      },
+      "gold": {
+        "role": "secondary",
+        "displayName": "温金",
+        "tonalRamp": [
+          "oklch(15.00% 0.09210 78.37)",
+          "oklch(26.43% 0.09210 78.37)",
+          "oklch(37.86% 0.09210 78.37)",
+          "oklch(49.29% 0.09210 78.37)",
+          "oklch(60.71% 0.09210 78.37)",
+          "oklch(72.14% 0.09210 78.37)",
+          "oklch(83.57% 0.09210 78.37)",
+          "oklch(95.00% 0.09210 78.37)"
+        ]
+      },
+      "gold-tint": {
+        "role": "secondary",
+        "displayName": "浅温金",
+        "tonalRamp": [
+          "oklch(15.00% 0.02336 90.75)",
+          "oklch(26.43% 0.02336 90.75)",
+          "oklch(37.86% 0.02336 90.75)",
+          "oklch(49.29% 0.02336 90.75)",
+          "oklch(60.71% 0.02336 90.75)",
+          "oklch(72.14% 0.02336 90.75)",
+          "oklch(83.57% 0.02336 90.75)",
+          "oklch(95.00% 0.02336 90.75)"
+        ]
+      },
+      "danger": {
+        "role": "secondary",
+        "displayName": "赭红",
+        "tonalRamp": [
+          "oklch(15.00% 0.10582 38.59)",
+          "oklch(26.43% 0.10582 38.59)",
+          "oklch(37.86% 0.10582 38.59)",
+          "oklch(49.29% 0.10582 38.59)",
+          "oklch(60.71% 0.10582 38.59)",
+          "oklch(72.14% 0.10582 38.59)",
+          "oklch(83.57% 0.10582 38.59)",
+          "oklch(95.00% 0.10582 38.59)"
+        ]
+      },
+      "danger-tint": {
+        "role": "secondary",
+        "displayName": "浅赭红",
+        "tonalRamp": [
+          "oklch(15.00% 0.01685 56.19)",
+          "oklch(26.43% 0.01685 56.19)",
+          "oklch(37.86% 0.01685 56.19)",
+          "oklch(49.29% 0.01685 56.19)",
+          "oklch(60.71% 0.01685 56.19)",
+          "oklch(72.14% 0.01685 56.19)",
+          "oklch(83.57% 0.01685 56.19)",
+          "oklch(95.00% 0.01685 56.19)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "课程展示标题",
+        "purpose": "课程首屏的衬线大标题；响应式覆盖由现有 CSS 管理。"
+      },
+      "headline": {
+        "displayName": "单元标题",
+        "purpose": "讲义与作业的衬线标题。"
+      },
+      "section": {
+        "displayName": "章节标题",
+        "purpose": "任务、小节与资料区的无衬线标题。"
+      },
+      "title": {
+        "displayName": "三级标题",
+        "purpose": "普通内容小标题。"
+      },
+      "body": {
+        "displayName": "基础正文",
+        "purpose": "根级中文无衬线正文。"
+      },
+      "reading": {
+        "displayName": "讲义阅读正文",
+        "purpose": "长文使用更宽松的行高。"
+      },
+      "control": {
+        "displayName": "操作文字",
+        "purpose": "默认按钮文字。"
+      },
+      "label": {
+        "displayName": "辅助标签",
+        "purpose": "元信息与辅助说明。"
+      }
+    },
+    "shadows": [
+      {
+        "name": "settings-popover",
+        "value": "0 8px 30px #213a1a14",
+        "purpose": "页脚演示设置浮层。"
+      },
+      {
+        "name": "toast",
+        "value": "0 6px 30px #25361e1a",
+        "purpose": "底部操作通知。"
+      }
+    ],
+    "motion": [
+      {
+        "name": "button-colors",
+        "value": "background-color .15s, color .15s, border-color .15s",
+        "purpose": "按钮已有的颜色状态过渡；默认 CSS easing。"
+      },
+      {
+        "name": "outline-row",
+        "value": "background .15s",
+        "purpose": "课程大纲行的背景过渡。"
+      },
+      {
+        "name": "loading-breathe",
+        "value": "breathe 1.2s ease-in-out infinite alternate",
+        "purpose": "执行占位骨架透明度从 1 到 .45。"
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation: none; transition: none; scroll-behavior: auto",
+        "purpose": "prefers-reduced-motion: reduce 下的现有覆盖。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop-max",
+        "value": "1100px"
+      },
+      {
+        "name": "tablet-max",
+        "value": "850px"
+      },
+      {
+        "name": "single-column-max",
+        "value": "680px"
+      },
+      {
+        "name": "narrow-phone-max",
+        "value": "365px"
+      },
+      {
+        "name": "wide-desktop-min",
+        "value": "1600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "主要操作",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "前往端砚执行（演示）",
+      "html": "<button type=\"button\" class=\"ds-button-primary\">前往端砚执行（演示）<svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h15m-6-6 6 6-6 6\"/></svg></button>",
+      "css": ".ds-button-primary{display:inline-flex;justify-content:center;align-items:center;gap:10px;min-height:42px;padding:10px 18px;border-radius:6px;font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;font-size:13px;font-weight:500;line-height:1.5;cursor:pointer;transition:background-color .15s,color .15s,border-color .15s;background:var(--green,#0e3d2c);border:1px solid var(--green,#0e3d2c);color:var(--paper,#fffefb);}.ds-button-primary:not(:disabled):hover{background:var(--green-hover,#1e5840);border-color:var(--green-hover,#1e5840);}.ds-button-primary:focus-visible{outline:2px solid var(--gold,#876323);outline-offset:4px;}.ds-button-primary:disabled{cursor:not-allowed;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition:none}}"
+    },
+    {
+      "name": "次要操作",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "生成任务 Prompt（演示）",
+      "html": "<button type=\"button\" class=\"ds-button-secondary\">生成任务 Prompt（演示）</button>",
+      "css": ".ds-button-secondary{display:inline-flex;justify-content:center;align-items:center;gap:10px;min-height:42px;padding:10px 18px;border-radius:6px;font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;font-size:13px;font-weight:500;line-height:1.5;cursor:pointer;transition:background-color .15s,color .15s,border-color .15s;background:var(--paper,#fffefb);border:1px solid #cdd4c6;color:var(--green,#0e3d2c);}.ds-button-secondary:not(:disabled):hover{background:var(--green-tint,#edf2e8);border-color:#91a78e;}.ds-button-secondary:focus-visible{outline:2px solid var(--gold,#876323);outline-offset:4px;}.ds-button-secondary:disabled{cursor:not-allowed;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-button-secondary{transition:none}}"
+    },
+    {
+      "name": "文字操作",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "返回课程网页",
+      "html": "<button type=\"button\" class=\"ds-button-ghost\">返回课程网页</button>",
+      "css": ".ds-button-ghost{display:inline-flex;justify-content:center;align-items:center;gap:10px;min-height:42px;padding:10px 18px;border-radius:6px;font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;font-size:13px;font-weight:500;line-height:1.5;cursor:pointer;transition:background-color .15s,color .15s,border-color .15s;background:transparent;border:1px solid transparent;color:var(--green,#0e3d2c);}.ds-button-ghost:not(:disabled):hover{background:var(--green-tint,#edf2e8);}.ds-button-ghost:focus-visible{outline:2px solid var(--gold,#876323);outline-offset:4px;}.ds-button-ghost:disabled{cursor:not-allowed;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-button-ghost{transition:none}}"
+    },
+    {
+      "name": "输入与 Prompt 编辑",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "带可见标签的浅纸面输入框与网页 Prompt 编辑区。",
+      "html": "<div class=\"ds-field-group\"><label class=\"ds-field-label\" for=\"ds-topic\">课题名称</label><input class=\"ds-field\" id=\"ds-topic\" value=\"PD-1／PD-L1 研究入门\"/><label class=\"ds-field-label\" for=\"ds-prompt\">将交给端砚执行的 Prompt</label><textarea class=\"ds-prompt\" id=\"ds-prompt\" rows=\"4\">基于课程资料，比较机制证据与早期临床观察。</textarea></div>",
+      "css": ".ds-field-group{width:min(100%,460px);font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;color:var(--ink,#23352b)}.ds-field-label{display:block;font-size:12px;font-weight:500;margin:18px 0 9px}.ds-field,.ds-prompt{font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;color:var(--ink,#23352b);border:1px solid #cfd5c7;background:var(--paper,#fffefb);border-radius:5px;padding:11px 13px;width:100%;min-width:0}.ds-field{font-size:14px;line-height:1.6}.ds-prompt{font-size:12px;line-height:1.9;resize:vertical}.ds-field::placeholder,.ds-prompt::placeholder{color:var(--muted,#5e6b5b);opacity:1}.ds-field:focus-visible,.ds-prompt:focus-visible{outline:2px solid var(--gold,#876323);outline-offset:4px;}.ds-field[aria-invalid=\"true\"]{border-color:var(--danger,#974d35)}"
+    },
+    {
+      "name": "单元导航",
+      "kind": "nav",
+      "refersTo": "unit-navigation",
+      "description": "以小标签、标题与图标表达当前位置；全单元自由访问。",
+      "html": "<nav class=\"ds-unit-nav\" aria-label=\"课程目录\"><a class=\"ds-unit-link ds-unit-current\" href=\"#a1\" aria-current=\"page\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 3H5v18h14V8l-5-5Z\"/><path d=\"M14 3v5h5M8 12h8M8 16h6\"/></svg><span><small>作业 01</small><strong>界定研究问题</strong></span></a><a class=\"ds-unit-link\" href=\"#a2\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 3H5v18h14V8l-5-5Z\"/><path d=\"M14 3v5h5M8 12h8M8 16h6\"/></svg><span><small>作业 02</small><strong>完成研究论文</strong></span></a></nav>",
+      "css": ".ds-unit-nav{display:grid;gap:5px;max-width:280px;font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;color:var(--ink,#23352b)}.ds-unit-link{display:flex;align-items:center;gap:12px;padding:14px 12px;border-radius:6px;text-decoration:none;color:inherit}.ds-unit-link>svg{flex-shrink:0;color:var(--muted,#5e6b5b)}.ds-unit-link>span{flex:1;min-width:0}.ds-unit-link small{display:block;font-size:9px;color:var(--muted,#5e6b5b);line-height:1.75}.ds-unit-link strong{display:block;font-size:12px;font-weight:500;margin-top:3px;line-height:1.6}.ds-unit-current{background:#eaf0e2;color:var(--green,#0e3d2c)}.ds-unit-link:not(.ds-unit-current):hover{background:#f0f1e7}.ds-unit-link:focus-visible{outline:2px solid var(--gold,#876323);outline-offset:4px;}"
+    },
+    {
+      "name": "提交状态标签",
+      "kind": "chip",
+      "refersTo": "status-chip",
+      "description": "等待、通过与需修改使用文字、图标与底色共同表达。",
+      "html": "<div class=\"ds-status-row\"><span class=\"ds-status ds-status-pending\">待反馈</span><span class=\"ds-status ds-status-passed\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m5 12 4 4L19 6\"/></svg>已通过</span><span class=\"ds-status ds-status-redo\">请修改</span></div>",
+      "css": ".ds-status-row{display:flex;flex-wrap:wrap;gap:8px}.ds-status{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:4px;background:#f0f1ea;color:var(--muted,#5e6b5b);font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;font-size:10px;line-height:1.7;font-weight:400;white-space:nowrap}.ds-status-pending{background:var(--gold-tint,#f6f0df);color:#80601e}.ds-status-passed{background:#e9f0e2;color:#365b2e}.ds-status-redo{background:var(--danger-tint,#fbefe7);color:var(--danger,#974d35)}"
+    },
+    {
+      "name": "教师反馈容器",
+      "kind": "card",
+      "refersTo": "feedback-card",
+      "description": "浅色反馈编辑区保留人工决定的操作层级；预览仅展示容器。",
+      "html": "<section class=\"ds-feedback\"><h2>给这份作业反馈</h2><p>结合本次产物与执行记录，写下具体的修改建议。</p><label for=\"ds-feedback-text\">反馈内容</label><textarea id=\"ds-feedback-text\" rows=\"4\">请进一步区分机制证据与早期临床观察。</textarea><small>AI 评估仅供参考，最终反馈由教师确认。</small></section>",
+      "css": ".ds-feedback{max-width:360px;background:#f0f3e8;padding:24px;border-radius:6px;font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;color:var(--ink,#23352b)}.ds-feedback h2{font-size:16px;line-height:1.5;font-weight:600;color:var(--heading,#153c2b);margin:0}.ds-feedback p{font-size:11px;line-height:1.85;color:var(--muted,#5e6b5b);margin:10px 0 20px}.ds-feedback label{display:block;font-size:11px;font-weight:500;margin-bottom:8px}.ds-feedback textarea{font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;font-size:11px;line-height:1.9;color:inherit;min-height:125px;width:100%;resize:vertical;padding:11px 13px;background:var(--paper,#fffefb);border:1px solid #cfd5c7;border-radius:5px}.ds-feedback textarea:focus-visible{outline:2px solid var(--gold,#876323);outline-offset:4px;}.ds-feedback small{display:block;font-size:10px;line-height:1.75;color:var(--muted,#5e6b5b);margin:14px 0 0}"
+    },
+    {
+      "name": "网页与端砚任务流程",
+      "kind": "custom",
+      "refersTo": "task-flow",
+      "description": "当前作业的三段职责提示，展示实际网页编辑与端砚执行边界。",
+      "html": "<ol class=\"ds-task-flow\" aria-label=\"这份作业的完成方式\"><li><span>课程网页</span><strong>准备 Prompt</strong><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h15m-6-6 6 6-6 6\"/></svg></li><li><span>端砚</span><strong>Agent 执行任务</strong><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h15m-6-6 6 6-6 6\"/></svg></li><li><span>回到课程网页</span><strong>优化、提交交付物</strong></li></ol>",
+      "css": ".ds-task-flow{display:flex;justify-content:space-between;gap:20px;padding:0 0 24px;margin:0 0 24px;list-style:none;border-bottom:1px solid var(--line,#e0e3d8);font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif}.ds-task-flow li{position:relative;flex:1;padding-right:22px}.ds-task-flow li>span{display:block;color:var(--muted,#5e6b5b);font-size:10px;line-height:1.6}.ds-task-flow strong{display:block;color:var(--green,#0e3d2c);font-size:12px;line-height:1.6;font-weight:500;margin-top:5px}.ds-task-flow svg{position:absolute;right:0;top:14px;color:var(--muted,#5e6b5b)}@media(max-width:680px){.ds-task-flow{gap:10px;padding-bottom:20px}.ds-task-flow li{padding-right:15px}.ds-task-flow li>span{font-size:9px}.ds-task-flow strong{font-size:10px}.ds-task-flow svg{width:12px;top:15px}}"
+    },
+    {
+      "name": "执行页面标签",
+      "kind": "nav",
+      "refersTo": "tabs",
+      "description": "输入、执行结果与运行记录使用文本和底部细线指示当前标签。",
+      "html": "<nav class=\"ds-tabs\" aria-label=\"Agent 任务\"><button type=\"button\" aria-pressed=\"true\">任务输入</button><button type=\"button\" aria-pressed=\"false\">执行结果</button><button type=\"button\" aria-pressed=\"false\">运行记录</button></nav>",
+      "css": ".ds-tabs{display:flex;gap:24px;min-height:56px;border-bottom:1px solid var(--line,#e0e3d8);font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif}.ds-tabs button{position:relative;display:inline-flex;align-items:center;background:none;border:0;padding:0;font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;font-size:11px;line-height:1.6;color:var(--muted,#5e6b5b);white-space:nowrap;cursor:pointer}.ds-tabs button[aria-pressed=\"true\"]{color:var(--green,#0e3d2c);font-weight:500}.ds-tabs button[aria-pressed=\"true\"]::after{content:\"\";position:absolute;bottom:-1px;left:0;width:100%;height:2px;background:#4b7143}.ds-tabs button:focus-visible{outline:2px solid var(--gold,#876323);outline-offset:4px;}@media(max-width:680px){.ds-tabs{gap:18px;min-height:52px}.ds-tabs button{font-size:10px}}"
+    },
+    {
+      "name": "单元操作记录",
+      "kind": "custom",
+      "description": "竖向细线、图标圆点、时间与说明构成课程执行轨迹；所有示例为 Mock。",
+      "html": "<ol class=\"ds-timeline\"><li><span class=\"ds-timeline-dot\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 5 11 7-11 7V5Z\"/></svg></span><div class=\"ds-timeline-content\"><div><strong>Agent 执行</strong><time>10:20</time></div><p>根据本单元 Prompt 生成课程示例产物。</p></div></li><li><span class=\"ds-timeline-dot\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 12H5m6-6-6 6 6 6\"/></svg></span><div class=\"ds-timeline-content\"><div><strong>结果返回网页</strong><time>10:21</time></div><p>等待学员在网页检查、优化并手动提交。</p></div></li></ol>",
+      "css": ".ds-timeline{padding:0;margin:24px 0 0;list-style:none;font-family:\"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans SC\", sans-serif;max-width:520px}.ds-timeline>li{position:relative;display:flex;align-items:flex-start;gap:13px;padding-bottom:25px}.ds-timeline>li:not(:last-child)::after{content:\"\";position:absolute;left:13px;top:29px;bottom:4px;width:1px;background:#dbe2d1}.ds-timeline-dot{position:relative;z-index:1;display:inline-grid;place-items:center;width:27px;height:27px;border-radius:50%;background:#edf2e4;color:var(--muted,#5e6b5b);flex-shrink:0}.ds-timeline-content{flex:1;min-width:0;padding-top:1px}.ds-timeline-content>div{display:flex;align-items:center;gap:12px;justify-content:space-between}.ds-timeline-content strong{font-size:12px;font-weight:500;line-height:1.6;color:var(--ink,#23352b)}.ds-timeline-content time{font-size:9px;color:var(--muted,#5e6b5b);font-variant-numeric:tabular-nums}.ds-timeline-content p{font-size:11px;line-height:1.85;color:var(--muted,#5e6b5b);margin:5px 0 0}"
+    }
+  ],
+  "narrative": {
+    "northStar": "米白纸上的研究课堂",
+    "overview": "以现有米白纸面与深绿文字构成一间安静的研究课堂。大标题、讲义、文献、图解和作业共用连续的纸面；绿色承担身份与主要操作，细线、留白和浅色块帮助读者辨认章节与当前状态。\n\n标题使用带中文回退的衬线字体，正文和控件采用系统中文无衬线。科研插画与机制教学图由本地 SVG 绘制；细胞、受体和通路关系服务课程理解。作业与反馈沿用同一视觉语言，通过清楚的动作名称表达任务当前处于网页还是端砚执行页。",
+    "keyCharacteristics": [
+      "温暖米白画布与低饱和浅色分层。",
+      "深绿主操作、衬线课程标题与清晰的中文正文。",
+      "连续章节、细分隔线和有节奏的留白。",
+      "小圆角控件、轻边框与文字说明共同表达状态。",
+      "本地 SVG 教学图与显式的前端 Mock 标识。"
+    ],
+    "rules": [
+      {
+        "name": "The 绿墨分工 Rule",
+        "body": "深绿用于品牌、主操作、当前导航与关键任务标题；浅绿承接辅助分区。金色用于等待与键盘焦点，赭红用于错误与需修改反馈。",
+        "section": "colors"
+      },
+      {
+        "name": "The 标题与操作分声 Rule",
+        "body": "课程、单元和产物标题沿用衬线字体；导航、表单、按钮和状态标签沿用无衬线字体。英文文献标题与年份保留现有 Georgia 排版。",
+        "section": "typography"
+      },
+      {
+        "name": "The 纸面连续 Rule",
+        "body": "章节之间沿用留白和细线，浅色块承接已有的提示、任务上下文和教师反馈用途。长文允许自然换行，表格在窄屏容器内滚动。",
+        "section": "layout"
+      },
+      {
+        "name": "The 正文平面 Rule",
+        "body": "课程正文、作业与反馈区以边框和色调区分层次；现有盒阴影只用于演示设置浮层与 toast。插画内部的 SVG 投影属于图像本身。",
+        "section": "elevation"
+      },
+      {
+        "name": "The 小圆角 Rule",
+        "body": "标签、表单和按钮采用小圆角；圆形只用于头像、完成标记与时间线节点。不要将现有矩形操作控件改成胶囊形。",
+        "section": "shapes"
+      },
+      {
+        "name": "The 网页归口 Rule",
+        "body": "课程网页生成和编辑 Prompt，接收并编辑、优化执行结果，再由学员手动提交。端砚同站 Mock 只接收标准任务、执行 Agent 并返回结果；入口与动作标签持续表达这一职责。",
+        "section": "components"
+      },
+      {
+        "name": "The 可访问单元 Rule",
+        "body": "完成入课校验后，讲义、测验、三份作业与选读均可直接进入；当前导航和完成状态分别表达位置与进度，不表达学习前置锁。作业使用默认课题，缺少前置产物时使用课程样例。",
+        "section": "components"
+      },
+      {
+        "name": "The 演示证据 Rule",
+        "body": "页脚保留课程、产物与轨迹为 Mock 的说明；端砚执行页和网页优化结果旁保留对应演示说明。AI 评估是建议，最终反馈由教师点击。",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do 保留米白画布与深绿主操作，沿用 frontmatter 的颜色 token。",
+      "Do 用衬线标题与无衬线正文、控件维持现有层级。",
+      "Do 保留键盘焦点、可读标签、错误文字与状态说明。",
+      "Do 在窄屏保持任务入口与提交按钮可用，并沿用课程目录折叠和表格局部滚动。",
+      "Do 将 Prompt 编辑、交付物优化与手动提交放在课程网页。",
+      "Do 保留全单元自由访问、课程样例与各处 Mock 说明。"
+    ],
+    "donts": [
+      "Don't 替换已确认的米白与深绿视觉身份。",
+      "Don't 为课程正文与普通分区增加悬浮阴影或胶囊形主按钮。",
+      "Don't 用颜色单独代替状态文字、错误说明或当前导航标识。",
+      "Don't 将课程教学图、前端产物或模拟轨迹描述为实验记录、真实模型结果或真实端砚接入。",
+      "Don't 把优化当成提交、把 AI 建议当成教师裁定，或恢复学习顺序的前置锁。"
+    ]
+  }
+}
