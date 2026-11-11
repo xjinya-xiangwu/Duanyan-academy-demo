@@ -1,4 +1,4 @@
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import type { FailureKind, Role } from "./domain/model";
 import { paths } from "./domain/model";
 import { useCourse } from "./store";
@@ -18,6 +18,17 @@ const ARMS: { id: FailureKind; label: string }[] = [
 export function Shell() {
   const { state, dispatch } = useCourse();
   const navigate = useNavigate();
+  const location = useLocation();
+  const onTeacherRoute = location.pathname.includes("/teacher");
+
+  function chooseRole(role: Role) {
+    dispatch({ type: "set_role", role: role });
+    if (role === "student") {
+      if (onTeacherRoute) navigate(paths.course);
+      return;
+    }
+    navigate(paths.teacher);
+  }
 
   return (
     <div className="app">
@@ -27,7 +38,7 @@ export function Shell() {
         </Link>
         <span>课程</span>
       </header>
-      <div className="wrap">
+      <div className={onTeacherRoute ? "wrap wrap-wide" : "wrap"}>
         {state.notice ? (
           <p className="note" role="status" data-testid="notice">
             {state.notice}
@@ -38,7 +49,7 @@ export function Shell() {
         </main>
       </div>
       <footer>
-        <p data-testid="mock-footer">演示／Mock。前端预览，不是生产环境，没有真实轨迹入库。</p>
+        <p data-testid="mock-footer">演示／Mock。前端预览，不是生产环境，轨迹只留在这次预览里。</p>
         <div className="roles" role="group" aria-label="切换身份">
           {ROLES.map((role) => (
             <button
@@ -46,7 +57,7 @@ export function Shell() {
               type="button"
               data-testid={`role-${role.id}`}
               aria-pressed={state.role === role.id}
-              onClick={() => dispatch({ type: "set_role", role: role.id })}
+              onClick={() => chooseRole(role.id)}
             >
               {role.label}
             </button>

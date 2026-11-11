@@ -26,6 +26,47 @@ export const TEMPLATE_STEPS = [
 ] as const;
 
 export type UnitId = "q1" | "a2" | "a3" | "a4";
+export type ConfigKey = "lesson" | UnitId;
+
+export interface UnitConfig {
+  title: string;
+  notes: string;
+  requirement: string;
+  duanyanRequired: boolean;
+}
+
+export const DEFAULT_CONFIGS: Record<ConfigKey, UnitConfig> = {
+  lesson: {
+    title: "结合之后，活化信号怎么画",
+    notes: "结合之后，活化信号怎么画。",
+    requirement: "读完讲义。已读不计为作业完成。",
+    duanyanRequired: false,
+  },
+  q1: {
+    title: "Q1 · 课内检查",
+    notes: "纸面两题用来回忆。短实训在端砚里做，回到这一节。",
+    requirement: "用两三句话写出这张图的边界，并回到这一测验。课题仍是上面这一门。",
+    duanyanRequired: true,
+  },
+  a2: {
+    title: "课题与 Agent 界定",
+    notes: "打开本课课题，写出可检验的问题界定。",
+    requirement: "回传一份问题界定短文。",
+    duanyanRequired: true,
+  },
+  a3: {
+    title: "Agent 论文",
+    notes: "写大纲中的一段，并给出引用主张。",
+    requirement: "回传段落和引用主张。",
+    duanyanRequired: true,
+  },
+  a4: {
+    title: "图生",
+    notes: "为同一课题放一张机制示意。",
+    requirement: "回传图和图注。",
+    duanyanRequired: true,
+  },
+};
 
 export function unitShort(unitId: UnitId): string {
   switch (unitId) {

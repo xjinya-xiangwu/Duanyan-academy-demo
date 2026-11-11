@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useReducer, type Dispatch, type R
 import { initialState, reducer } from "./domain/model";
 import type { Action, DemoState } from "./domain/model";
 
-const STORAGE_KEY = "duanyan-academy-demo-v04";
+const STORAGE_KEY = "duanyan-academy-demo-v05";
 
 type StoreValue = {
   state: DemoState;
@@ -14,7 +14,14 @@ const StoreContext = createContext<StoreValue | null>(null);
 function isState(value: unknown): value is DemoState {
   if (!value || typeof value !== "object") return false;
   const record = value as DemoState;
-  return record.version === 4 && Boolean(record.units?.q1) && Boolean(record.units?.a4) && Boolean(record.draft);
+  return (
+    record.version === 5 &&
+    Boolean(record.units?.q1) &&
+    Boolean(record.units?.a4) &&
+    Boolean(record.draft) &&
+    Boolean(record.configs?.lesson) &&
+    Boolean(record.configs?.a4)
+  );
 }
 
 function readState(): DemoState {

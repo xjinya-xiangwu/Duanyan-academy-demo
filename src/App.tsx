@@ -10,6 +10,12 @@ import { QuizPage } from "./pages/QuizPage";
 import { AssignmentPage } from "./pages/AssignmentPage";
 import { StudioPage } from "./pages/StudioPage";
 import { PeerPage } from "./pages/PeerPage";
+import { TeacherView } from "./pages/TeacherView";
+import { TeacherGate, WorkbenchLayout } from "./pages/teacher/WorkbenchLayout";
+import { ConfigFormPage, ConfigListPage } from "./pages/teacher/ConfigPages";
+import { AssignmentListPage, AssignmentReviewPage } from "./pages/teacher/AssignmentManagePage";
+import { DatasetPage } from "./pages/teacher/DatasetPage";
+import { RulesPage } from "./pages/teacher/RulesPage";
 
 function CourseLayout() {
   const { courseId } = useParams();
@@ -43,6 +49,17 @@ export function App() {
               <Route path="assignments/:step/feedback" element={<AssignmentPage />} />
               <Route path="studio" element={<StudioPage />} />
               <Route path="peer" element={<PeerPage />} />
+              <Route path="teacher" element={<TeacherGate />}>
+                <Route element={<WorkbenchLayout />}>
+                  <Route index element={<TeacherView />} />
+                  <Route path="config" element={<ConfigListPage />} />
+                  <Route path="config/:key" element={<ConfigFormPage />} />
+                  <Route path="assignments" element={<AssignmentListPage />} />
+                  <Route path="assignments/:unitId" element={<AssignmentReviewPage />} />
+                  <Route path="dataset" element={<DatasetPage />} />
+                  <Route path="rules" element={<RulesPage />} />
+                </Route>
+              </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
