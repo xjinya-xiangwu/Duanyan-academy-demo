@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { TOPIC_ID, isPracticeId, unitOf } from "../domain/content";
 import { useDelayedAction, useDemo } from "../store";
-import { ResourceList, TextArtifact, Timeline } from "../components/common";
+import { ResourceList, TextArtifact } from "../components/common";
 import { Icon, InkLogo } from "../components/icons";
 import { MechanismFigure } from "../components/visuals";
+import { TrajectoryViewer } from "../components/trajectory-viewer";
 
 export function StudioPage() {
   const { unit: param } = useParams(), navigate = useNavigate();
@@ -29,7 +30,7 @@ export function StudioPage() {
           {busy ? <div className="generating-state" role="status"><div className="generation-mark"><Icon name="play" size={25} /></div><h2>Agent 正在执行课程任务…</h2><p>使用网页传入的 Prompt、课题与资料</p><div className="skeleton-lines"><span /><span /><span /></div></div> : <>
             {tab === "input" && <div className="prompt-document"><span className="muted-tag">来自课程网页的任务</span><h2>{unit.shortTitle}</h2><div className="agent-input-prompt" data-testid="agent-input-prompt">{work.prompt || unit.prompt}</div><p className="small-note">需要修改 Prompt？从左上角返回课程网页。执行完成后，也将在网页检查、优化并提交交付物。</p></div>}
             {tab === "result" && (work.draft ? <div className="draft-paper" data-testid="agent-result"><div className="draft-caption"><span>Agent 执行结果 · 版本 {work.executeVersion}</span><span>{work.draft.length} 字符</span></div>{work.figure && <MechanismFigure />}<TextArtifact text={work.draft} /></div> : <div className="editor-empty"><Icon name="file" size={34} /><h2>尚未执行这个任务</h2><p>任务输入已准备好，点击下方“运行 Agent 任务”即可开始。</p></div>)}
-            {tab === "trace" && <div className="studio-timeline"><h2>Agent 运行记录</h2><Timeline events={state.events.filter((event) => event.unit === id && ["bring_in", "execute", "receive"].includes(event.kind))} /></div>}
+            {tab === "trace" && <div className="studio-timeline"><h2>Agent 运行记录</h2><TrajectoryViewer runs={work.runs} /></div>}
           </>}
         </div><div className="editor-toolbar"><span><span className="live-dot" />{work.draft ? "执行结果已就绪，可返回课程网页" : "课程任务输入已就绪"}</span><button className="button primary" data-testid="run-agent" disabled={busy} onClick={() => run({ type: "generate", unit: id }, () => setTab("result"))}><Icon name="play" size={16} />{work.draft ? "重新运行 Agent 任务" : "运行 Agent 任务"}</button></div>
       </section></div><div className="studio-footer-note"><Icon name="info" size={14} /><span>标准 Agent 执行与返回为同站 Mock；未接真实端砚或模型服务。</span></div>

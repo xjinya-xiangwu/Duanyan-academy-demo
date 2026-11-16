@@ -11,7 +11,7 @@ html = html.replace(/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g, (_
   return "<style>" + css + "</style>";
 });
 if (/<(?:script|link)\b[^>]*(?:src|href)="\.\/assets\//.test(html)) throw new Error("The offline artifact still contains an external build asset.");
-html = html.replace("<body>", '<body data-demo-version="0.6.0">');
+html = html.replace("<body>", '<body data-demo-version="0.7.0">');
 const target = resolve(process.argv[2] || "../../outputs/Duanyan-Academy-Demo.html");
 mkdirSync(dirname(target), { recursive: true });
 writeFileSync(target, html, "utf8");

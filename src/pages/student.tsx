@@ -6,7 +6,7 @@ import { useDemo } from "../store";
 import { Breadcrumb, CourseLayout, NextLesson, ReadingList, ResourceList, Status, TextArtifact, UnitEvidenceSummary, UnitHeading, kindIcon } from "../components/common";
 import { CourseArt, MechanismFigure } from "../components/visuals";
 import { Icon } from "../components/icons";
-import { DataConsent, TaskPreparation, WebResult } from "../components/course-work";
+import { TaskPreparation, WebResult } from "../components/course-work";
 import { displayUnit } from "../domain/assets";
 import { CourseJourney } from "../components/course-journey";
 
@@ -78,7 +78,6 @@ export function UnitPage() {
     <div className="unit-status-line"><Status value={slot.status} /><span>网页准备与优化 · 端砚只执行并返回结果</span></div>
     {id === "a1" ? <TopicConfirmation /> : <div className="topic-context"><Icon name="branch" size={17} /><span>当前课题：{state.topicTitle}</span></div>}
     <TaskPreparation id={id} onExecute={openStudio} />
-    <DataConsent id={id} />
     <WebResult id={id} />
     <SubmissionSlot id={id} />
     {id === "q1" && <QuizConcepts />}

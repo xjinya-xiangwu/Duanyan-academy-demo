@@ -1,5 +1,6 @@
 import { ARTIFACTS, ASSIGNMENT_IDS, INVITE_CODE, OPTIMIZATIONS, PRACTICE_IDS, QUIZ_QUESTIONS, STUDENT_NAME, TOPIC_ID, TOPIC_TITLE, unitOf, type PracticeId, type UnitId } from "./content";
-import { candidateProblems, emptyReview, QUALITY_DIMENSIONS, type AssetReview, type ConfigId, type Consent, type UnitConfig } from "./assets";
+import { candidateProblems, emptyReview, QUALITY_DIMENSIONS, type AssetReview, type ConfigId, type UnitConfig } from "./assets";
+import { artifactBlocks, createTaskRun, FIELD_DEFINITIONS, fieldsOf, templateOf, type Annotation, type AnnotationTemplate, type FieldKey, type StructuredFields, type TaskRun } from "./trajectory";
 
 export type Role = "student" | "teacher";
 export type UnitStatus = "new" | "working" | "returned" | "pending" | "passed" | "redo";
@@ -13,11 +14,13 @@ export interface Evaluation { tendency: "建议通过" | "建议请修改"; reas
 export interface Submission {
   id: string; revision: number; artifact: string; figure: boolean; time: number;
   prompt?: string; executionArtifact?: string; taskConfig?: UnitConfig;
+  artifactVersion?: number; fields?: StructuredFields;
   evaluation?: Evaluation; decision?: "passed" | "redo"; feedback?: string;
 }
 export interface UnitState {
   prompt: string; receivedVersion: number;
   executionArtifact: string; executionPrompt: string; executionConfig?: UnitConfig;
+  runs: TaskRun[]; artifactVersion: number; artifactHistory: { version: number; content: string; figure: boolean; reason: string }[];
   status: UnitStatus; draft: string; figure: boolean; executeVersion: number;
   lastReturnedExecute: number; redoFloor: number; revision: number; submissions: Submission[];
 }
@@ -26,12 +29,11 @@ export interface CourseDraft {
   attached: Record<"a1" | "a2" | "a3", boolean>; invite: string; roster: string[];
 }
 export interface DemoState {
-  version: 6; role: Role; entered: boolean; lessonRead: boolean; topicConfirmed: boolean;
+  version: 7; role: Role; entered: boolean; lessonRead: boolean; topicConfirmed: boolean;
   topicTitle: string; answers: Record<string, string>; quizChecked: boolean;
   units: Record<PracticeId, UnitState>; events: TraceEvent[]; seq: number;
   courseDraft: CourseDraft; failNext: "generate" | "optimize" | "evaluate" | null;
-  unitConfigs: Record<ConfigId, UnitConfig>; consents: Record<PracticeId, Consent>;
-  institutionAuthorized: boolean; teacherAuthorized: boolean;
+  unitConfigs: Record<ConfigId, UnitConfig>; annotations: Annotation[]; annotationTemplates: Record<PracticeId, AnnotationTemplate>;
   assetReviews: Record<PracticeId, AssetReview>;
   audit: { time: number; unit?: PracticeId; summary: string }[];
   research: { path: "own" | "mentor"; title: string; details: string; submitted: boolean; accepted: boolean; verified: boolean };
@@ -49,6 +51,7 @@ export type Action =
   | { type: "open"; unit: PracticeId } | { type: "leave"; unit: PracticeId }
   | { type: "generate"; unit: PracticeId } | { type: "optimize"; unit: PracticeId }
   | { type: "edit"; unit: PracticeId; text: string } | { type: "return"; unit: PracticeId }
+  | { type: "commit_edit"; unit: PracticeId }
   | { type: "evaluate"; unit: PracticeId } | { type: "feedback"; unit: PracticeId; decision: "passed" | "redo"; comment: string }
   | { type: "check_bundle" } | { type: "claim" }
   | { type: "fail_next"; operation: "generate" | "optimize" | "evaluate" }
@@ -57,23 +60,24 @@ export type Action =
 
 export type GovernanceAction =
   | { type: "configure"; unit: ConfigId; config: UnitConfig }
-  | { type: "consent"; unit: PracticeId; value: Consent }
-  | { type: "authorize"; party: "institution" | "teacher"; value: boolean }
+  | { type: "annotation_template"; unit: PracticeId }
+  | { type: "save_annotation_template"; unit: PracticeId; prompt: string }
+  | { type: "suggest_fields"; unit: PracticeId; artifactVersion: number }
+  | { type: "annotate"; unit: PracticeId; artifactVersion: number; blockId: string; field: FieldKey; value: string; rationale: string; proposalId?: string }
   | { type: "asset_review"; unit: PracticeId; review: AssetReview }
   | { type: "candidate"; unit: PracticeId }
   | { type: "research_apply"; path: "own" | "mentor"; title: string; details: string }
   | { type: "research_accept"; verified: boolean };
 
-const emptyUnit = (id: PracticeId): UnitState => ({ prompt: unitOf(id).prompt || "", executionArtifact: "", executionPrompt: "", receivedVersion: 0, status: "new", draft: "", figure: false, executeVersion: 0, lastReturnedExecute: 0, redoFloor: 0, revision: 0, submissions: [] });
+const emptyUnit = (id: PracticeId): UnitState => ({ prompt: unitOf(id).prompt || "", executionArtifact: "", executionPrompt: "", receivedVersion: 0, status: "new", draft: "", figure: false, executeVersion: 0, lastReturnedExecute: 0, redoFloor: 0, revision: 0, submissions: [], runs: [], artifactVersion: 0, artifactHistory: [] });
 export function createInitialState(): DemoState {
   return {
-    version: 6, role: "student", entered: true, lessonRead: false, topicConfirmed: true, topicTitle: TOPIC_TITLE,
+    version: 7, role: "student", entered: true, lessonRead: false, topicConfirmed: true, topicTitle: TOPIC_TITLE,
     answers: {}, quizChecked: false, units: { q1: emptyUnit("q1"), a1: emptyUnit("a1"), a2: emptyUnit("a2"), a3: emptyUnit("a3") },
     events: [], seq: 0, failNext: null, notice: null,
     courseDraft: { created: false, phase: "draft", attached: { a1: true, a2: true, a3: true }, invite: "", roster: [] },
     unitConfigs: Object.fromEntries(["lesson", ...PRACTICE_IDS].map((id) => { const unit = unitOf(id as ConfigId); return [id, { title: unit.title, description: unit.description, requirements: unit.prompt || unit.goals.join("；"), duanyanRequired: id !== "lesson" }]; })) as Record<ConfigId, UnitConfig>,
-    consents: { q1: "education", a1: "education", a2: "education", a3: "education" },
-    institutionAuthorized: false, teacherAuthorized: false,
+    annotations: [], annotationTemplates: Object.fromEntries(PRACTICE_IDS.map((id) => [id, templateOf(id, unitOf(id).prompt || "")])) as Record<PracticeId, AnnotationTemplate>,
     assetReviews: { q1: emptyReview(), a1: emptyReview(), a2: emptyReview(), a3: emptyReview() }, audit: [],
     research: { path: "own", title: "", details: "", submitted: false, accepted: false, verified: false },
   };
@@ -135,6 +139,12 @@ export function returnProblem(state: DemoState, unit: PracticeId): string | null
 function refreshBundle(state: DemoState) {
   if (bundleComplete(state)) for (const id of ASSIGNMENT_IDS) if (state.units[id].status === "returned") state.units[id].status = "pending";
 }
+function snapshotArtifact(state: DemoState, unit: PracticeId, reason: string) {
+  const work = state.units[unit];
+  if (work.artifactHistory.at(-1)?.content === work.draft) return;
+  work.artifactVersion += 1;
+  work.artifactHistory.push({ version: work.artifactVersion, content: work.draft, figure: work.figure, reason });
+}
 function operationFails(state: DemoState, operation: "generate" | "optimize" | "evaluate") {
   if (state.failNext !== operation) return false;
   state.failNext = null;
@@ -153,18 +163,38 @@ export function reducer(state: DemoState, action: Action | GovernanceAction): De
       if (action.unit !== "lesson") { next.units[action.unit].prompt = action.config.requirements; next.assetReviews[action.unit].approved = false; }
       return notify(next, "配置已保存，学员页和新生成的 Prompt 已同步。", "success");
     }
-    case "consent": {
-      if (next.role !== "student") return notify(next, "学生授权须由学员本人选择。", "error");
-      next.consents[action.unit] = action.value; next.assetReviews[action.unit].approved = false;
-      next.audit.push({ time: Date.now(), unit: action.unit, summary: action.value === "training" ? "学员主动选择演示训练授权；仍需复核。" : "学员仅选教学或撤回授权，排除训练候选；课程提交与反馈保留。" });
-      return notify(next, "用途选择已保存，不影响学习、提交和学分判断。", "success");
+    case "annotation_template": {
+      if (next.role !== "teacher") return notify(next, "请由教师生成标注模板。", "error");
+      const current = next.annotationTemplates[action.unit];
+      next.annotationTemplates[action.unit] = templateOf(action.unit, next.unitConfigs[action.unit].requirements, current.version + 1);
+      return notify(next, "AI 标注 Prompt 模板已生成，请编辑确认后供学生使用。", "success");
     }
-    case "authorize": {
-      if (next.role !== "teacher") return notify(next, "请在教师工作台演示合作授权。", "error");
-      if (action.party === "institution") next.institutionAuthorized = action.value; else next.teacherAuthorized = action.value;
-      for (const id of PRACTICE_IDS) next.assetReviews[id].approved = false;
-      next.audit.push({ time: Date.now(), summary: (action.party === "institution" ? "高校框架" : "教师贡献") + "演示授权：" + action.value });
-      return notify(next, "合作授权演示状态已更新，候选资格需重新审核。", "success");
+    case "save_annotation_template": {
+      if (next.role !== "teacher" || action.prompt.trim().length < 20) return notify(next, "教师需确认完整的标注模板。", "error");
+      next.annotationTemplates[action.unit] = { ...next.annotationTemplates[action.unit], prompt: action.prompt.trim(), confirmed: true };
+      return notify(next, "标注模板已由教师确认，学生提交前可生成字段建议。", "success");
+    }
+    case "suggest_fields": {
+      const work = next.units[action.unit], snapshot = work.artifactHistory.find((item) => item.version === action.artifactVersion);
+      if (!snapshot) return notify(next, "请先获取本版交付物，再生成字段。", "error");
+      const fields = fieldsOf(action.unit, next.topicTitle), blockId = artifactBlocks(snapshot.content).find((block) => !block.text.startsWith("## "))?.id || "block-1";
+      const round = next.annotations.filter((item) => item.unit === action.unit && item.author === "ai").reduce((max, item) => Math.max(max, item.round), 0) + 1;
+      for (const field of FIELD_DEFINITIONS) next.annotations.push({ id: "annotation-" + (++next.seq), unit: action.unit, artifactVersion: action.artifactVersion, blockId, field: field.key, author: "ai", round, value: fields[field.key], rationale: "依据任务模板和课程样例生成，待人工核对。", status: "proposed", time: Date.now() });
+      return notify(next, "结构化字段建议已生成，请逐项编辑或确认。", "success");
+    }
+    case "annotate": {
+      const work = next.units[action.unit], snapshot = work.artifactHistory.find((item) => item.version === action.artifactVersion);
+      const latest = latestSubmission(next, action.unit);
+      if (!snapshot || !artifactBlocks(snapshot.content).some((block) => block.id === action.blockId) || !FIELD_DEFINITIONS.some((field) => field.key === action.field)) return notify(next, "标注目标或字段无效。", "error");
+      if (next.role === "teacher" && latest?.artifactVersion !== action.artifactVersion) return notify(next, "请在当前提交版本完成人工标注。", "error");
+      if (next.role === "student" && work.artifactVersion !== action.artifactVersion) return notify(next, "请在当前交付物版本完成学生标注。", "error");
+      if (!action.value.trim() || action.rationale.trim().length < 4) return notify(next, "请填写字段内容和至少 4 字的判断理由。", "error");
+      const proposal = action.proposalId && next.annotations.find((item) => item.id === action.proposalId && item.unit === action.unit && item.artifactVersion === action.artifactVersion && item.field === action.field && item.author === "ai");
+      if (action.proposalId && !proposal) return notify(next, "AI 建议与当前产物版本不对应。", "error");
+      const round = next.annotations.filter((item) => item.unit === action.unit && item.author === next.role).reduce((max, item) => Math.max(max, item.round), 0) + 1;
+      next.annotations.push({ id: "annotation-" + (++next.seq), unit: action.unit, artifactVersion: action.artifactVersion, blockId: action.blockId, field: action.field, author: next.role, round, value: action.value.trim(), rationale: action.rationale.trim(), status: "confirmed", proposalId: action.proposalId, time: Date.now() });
+      next.assetReviews[action.unit].approved = false;
+      return notify(next, "人工标注已保存，保留作者、轮次、产物版本与修改理由。", "success");
     }
     case "asset_review": {
       if (next.role !== "teacher") return notify(next, "质量复核由教师执行。", "error");
@@ -258,17 +288,33 @@ export function reducer(state: DemoState, action: Action | GovernanceAction): De
     case "leave":
       if (!hasEvidence(next, action.unit)) return notify(next, "本单元尚未回传。草稿已保存在当前浏览器。");
       return next;
-    case "edit": next.units[action.unit].draft = action.text; return next;
+    case "edit": {
+      if (next.role !== "student") return notify(next, "请以学员身份编辑交付物。", "error");
+      next.units[action.unit].draft = action.text; return next;
+    }
+    case "commit_edit": {
+      const guard = requireStudent(next, action.unit);
+      if (guard) return notify(next, guard, "error");
+      snapshotArtifact(next, action.unit, "学生保存编辑"); return next;
+    }
     case "generate": {
       const guard = requireStudent(next, action.unit);
       if (guard) return notify(next, guard, "error");
-      if (operationFails(next, "generate")) { next.audit.push({ time: Date.now(), unit: action.unit, summary: "Mock Agent 执行失败，未写成功轨迹。" }); return next; }
+      if (operationFails(next, "generate")) {
+        next.audit.push({ time: Date.now(), unit: action.unit, summary: "Mock Agent 执行失败，未写成功轨迹。" });
+        const run = createTaskRun(action.unit, next.units[action.unit].executeVersion + 1, next.units[action.unit].prompt);
+        run.id += "-failed-" + next.units[action.unit].runs.length;
+        run.steps = [{ ...run.steps[0], id: run.id + "-failure", status: "failed", title: "任务执行失败，可重试", durationMs: undefined, output: { error: "mock_execution_failure", retained_previous_artifact: true } }];
+        next.units[action.unit].runs.push(run); return next;
+      }
       const work = next.units[action.unit];
       if (!work.prompt?.trim()) work.prompt = unitOf(action.unit).prompt || "";
       work.draft = ARTIFACTS[action.unit]; work.figure = action.unit === "a3"; work.executeVersion += 1;
       work.executionArtifact = work.draft;
       work.executionPrompt = work.prompt;
       work.executionConfig = structuredClone(next.unitConfigs[action.unit]);
+      work.runs.push({ ...createTaskRun(action.unit, work.executeVersion, work.prompt), annotationTemplate: structuredClone(next.annotationTemplates[action.unit]) });
+      snapshotArtifact(next, action.unit, "Agent 执行结果");
       work.receivedVersion = 0;
       if (work.status === "new") work.status = "working";
       trace(next, action.unit, "bring_in", "接收课程网页准备的 Prompt、课题和随课资料。");
@@ -296,17 +342,19 @@ export function reducer(state: DemoState, action: Action | GovernanceAction): De
       const times = next.events.filter((event) => event.unit === action.unit && event.kind === "optimize").length;
       const improvement = OPTIMIZATIONS[action.unit][times % 2];
       work.draft += "\n\n## 第 " + (times + 1) + " 次修订\n\n" + improvement;
+      snapshotArtifact(next, action.unit, "网页优化");
       trace(next, action.unit, "optimize", "网页交付物优化：" + improvement, "optimize", times < 2);
       return notify(next, "交付物已在网页优化，尚未提交。", "success");
     }
     case "return": {
       const problem = returnProblem(next, action.unit);
       if (problem) return notify(next, problem, "error");
+      snapshotArtifact(next, action.unit, "学生确认提交");
       const work = next.units[action.unit], previous = latestSubmission(next, action.unit);
       if (previous?.artifact === work.draft && work.lastReturnedExecute === work.executeVersion && work.status !== "redo") return notify(next, "这份产物已回传，重复操作不会增加回流计数。");
       const first = !next.events.some((event) => event.unit === action.unit && event.kind === "return" && event.counted);
       work.revision += 1;
-      const submission: Submission = { id: action.unit + "-r" + work.revision, revision: work.revision, artifact: work.draft, figure: work.figure, time: Date.now(), prompt: work.executionPrompt, executionArtifact: work.executionArtifact, taskConfig: work.executionConfig };
+      const submission: Submission = { id: action.unit + "-r" + work.revision, revision: work.revision, artifact: work.draft, figure: work.figure, time: Date.now(), prompt: work.executionPrompt, executionArtifact: work.executionArtifact, taskConfig: work.executionConfig, artifactVersion: work.artifactVersion, fields: fieldsOf(action.unit, next.topicTitle) };
       next.assetReviews[action.unit] = emptyReview();
       work.submissions.push(submission); work.lastReturnedExecute = work.executeVersion;
       work.status = action.unit === "q1" ? "pending" : "returned";
