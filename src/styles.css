@@ -1,4 +1,43 @@
 @charset "UTF-8";
+.course-journey, .data-consent, .asset-review-panel, .cooperation-authorization, .configuration, .assignment-management, .dataset, .certificate-boundary { margin: 28px 0; padding: 24px; border: 1px solid var(--line); background: var(--paper); }
+.course-journey ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; list-style: none; padding: 0; }
+.course-journey li { border-left: 2px solid var(--line); padding-left: 16px; }
+.course-journey li span { color: var(--muted); font-size: 12px; }
+.course-journey h3, .research-paths h2 { margin: 8px 0; }
+.course-journey p, .data-consent p, .asset-review-panel p, .dataset p, .research-page p, .configuration p { margin: 12px 0; }
+.data-consent fieldset { border: 0; padding: 0; display: grid; gap: 12px; margin: 16px 0; }
+.data-consent label, .cooperation-authorization label { display: flex; align-items: flex-start; gap: 8px; margin: 12px 0; }
+.data-consent input, .cooperation-authorization input { flex-shrink: 0; margin-top: 5px; }
+.task-design-card { margin-top: 20px; }
+.task-design-card summary, .dataset-asset summary, .dataset-lifecycle summary { font-weight: 600; }
+.asset-fields { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; }
+.asset-fields dt { color: var(--muted); }
+.asset-fields dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.configuration-form, .research-form, .asset-review-panel form { display: grid; gap: 12px; max-width: 850px; margin-top: 20px; }
+.configuration input[type=text], .configuration input:not([type]), .configuration textarea, .configuration select, .research-form input:not([type]), .research-form textarea, .research-form select, .dataset-filters input, .dataset-filters select, .asset-review-panel select, .asset-review-panel textarea { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 5px; background: var(--paper); }
+.configuration-form button, .research-form button { justify-self: start; }
+.quality-score-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.quality-score-grid label { display: grid; gap: 8px; }
+.verifier-checks { padding-left: 20px; }
+.candidate-problems { color: var(--danger); }
+.dataset-filters { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0; }
+.dataset-filters label { display: grid; gap: 8px; flex: 1 1 160px; min-width: 0; }
+.dataset-asset { padding: 16px 0; border-top: 1px solid var(--line); }
+.dataset-asset summary { overflow-wrap: anywhere; }
+.asset-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.dataset pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 16px; background: var(--subtle); max-width: 100%; }
+.research-paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 24px 0; }
+.research-paths section { border-top: 2px solid var(--green); padding-top: 12px; }
+.research-status { padding: 16px; background: var(--green-tint); }
+.candidate-metric { flex-wrap: wrap; gap: 16px; }
+.course-tabs { flex-wrap: wrap; }
+@media (max-width: 768px) {
+  .course-journey ol, .research-paths { grid-template-columns: 1fr; }
+  .quality-score-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .course-journey, .data-consent, .asset-review-panel, .cooperation-authorization, .configuration, .assignment-management, .dataset, .certificate-boundary { padding: 16px; }
+  .asset-fields { grid-template-columns: 1fr; gap: 6px; }
+  .asset-fields dd { margin-bottom: 12px; }
+}
 :root {
   font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   color: #23352b; background: #fbfaf6; font-synthesis: none;

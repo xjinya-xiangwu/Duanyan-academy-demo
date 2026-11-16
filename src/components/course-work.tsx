@@ -5,6 +5,7 @@ import { useDelayedAction, useDemo } from "../store";
 import { TextArtifact } from "./common";
 import { Icon } from "./icons";
 import { MechanismFigure } from "./visuals";
+import { DATA_TYPES, CAPABILITIES, configOf } from "../domain/assets";
 
 export function TaskPreparation({ id, onExecute }: { id: PracticeId; onExecute: () => void }) {
   const { state, dispatch } = useDemo();
@@ -24,7 +25,13 @@ export function TaskPreparation({ id, onExecute }: { id: PracticeId; onExecute: 
     <div className="prompt-controls"><button className="button secondary" data-testid="prepare-prompt" disabled={busy} onClick={() => run({ type: "prepare_prompt", unit: id, instructions }, () => setShowPrompt(true))}><Icon name="spark" size={16} />{busy ? "正在生成任务 Prompt…" : "生成任务 Prompt（演示）"}</button><button className="text-link" aria-expanded={showPrompt} onClick={() => setShowPrompt(!showPrompt)}>{showPrompt ? "收起 Prompt" : "查看／编辑 Prompt"}<Icon name="down" size={13} /></button></div>
     {showPrompt && <div className="web-prompt-editor"><label htmlFor={"prompt-instructions-" + id}>补充要求（可选）</label><input id={"prompt-instructions-" + id} value={instructions} onChange={(event) => setInstructions(event.target.value)} placeholder="例如：重点比较机制证据与早期临床观察" /><label htmlFor={"task-prompt-" + id}>将交给端砚执行的 Prompt</label><textarea id={"task-prompt-" + id} data-testid="task-prompt" rows={7} value={state.units[id].prompt} onChange={(event) => dispatch({ type: "edit_prompt", unit: id, text: event.target.value })} /><p className="small-note">示例 Prompt 默认可直接使用；也可先生成或编辑，再前往端砚。</p></div>}
     <p className="handoff-note"><Icon name="arrow" size={15} />上方入口会把当前 Prompt、同一课题和资料交给端砚。端砚只执行 Agent 任务，结果会返回本页。</p>
+    <details className="task-design-card"><summary>任务设计卡与评价标准<Icon name="down" size={14} /></summary><dl className="asset-fields"><dt>科学问题</dt><dd>{state.topicTitle}</dd><dt>目标能力</dt><dd>{CAPABILITIES[id].join("、")}</dd><dt>输入与环境</dt><dd>七篇课程文献、课题样例；端砚 Agent 同站执行演示</dd><dt>权限边界</dt><dd>只用课程样例；无真实患者、未公开数据或外部工具调用</dd><dt>任务要求</dt><dd data-testid="configured-requirements">{configOf(state, id).requirements}</dd><dt>必交产物</dt><dd>{unit.outcome}，连同来源和执行记录</dd><dt>Rubric</dt><dd>问题范围清楚；主张对应出处；证据边界合理；过程可追溯</dd><dt>失败条件</dt><dd>产物缺失、来源不清、跨层次结论或缺执行记录。结构校验不代替科学评审。</dd><dt>资产类别</dt><dd>{DATA_TYPES.map((name, index) => "D" + String(index + 1).padStart(2, "0") + " " + name).join("；")}</dd></dl><p className="small-note">类别是回收标准；本样例尚无真实实验数据、工具调用、完整失败路径或 SKILL 包。</p></details>
   </section>;
+}
+
+export function DataConsent({ id }: { id: PracticeId }) {
+  const { state, dispatch } = useDemo();
+  return <section className="data-consent" data-testid="data-consent"><h2>这份任务数据，如何使用</h2><p>任务过程、工具记录、中间产物和提交结果用于课程学习与评价。模型训练需要单独选择，且不影响学习、成绩、学分或证书。</p><fieldset><legend>选择本任务的数据用途</legend><label><input type="radio" name={"consent-" + id} data-testid="consent-education" checked={state.consents[id] !== "training"} onChange={() => dispatch({ type: "consent", unit: id, value: "education" })} />只用于课程学习和评价</label><label><input type="radio" name={"consent-" + id} data-testid="consent-training" checked={state.consents[id] === "training"} onChange={() => dispatch({ type: "consent", unit: id, value: "training" })} />主动同意脱敏后用于模型训练与研究（演示）</label></fieldset>{state.consents[id] === "training" && <button className="text-button" data-testid="withdraw-consent" onClick={() => dispatch({ type: "consent", unit: id, value: "withdrawn" })}>撤回本任务训练授权</button>}<p className="small-note" data-testid="consent-status">{state.consents[id] === "withdrawn" ? "已撤回：排除训练候选，课程提交与反馈保留。" : "默认仅用于教学。训练授权、撤回及审计均为当前浏览器中的演示状态。"} 高校和教师只能授权自己的贡献，不能替学生授权。</p></section>;
 }
 
 export function WebResult({ id }: { id: PracticeId }) {

@@ -1,4 +1,5 @@
 import { ARTIFACTS, ASSIGNMENT_IDS, INVITE_CODE, OPTIMIZATIONS, PRACTICE_IDS, QUIZ_QUESTIONS, STUDENT_NAME, TOPIC_ID, TOPIC_TITLE, unitOf, type PracticeId, type UnitId } from "./content";
+import { candidateProblems, emptyReview, QUALITY_DIMENSIONS, type AssetReview, type ConfigId, type Consent, type UnitConfig } from "./assets";
 
 export type Role = "student" | "teacher";
 export type UnitStatus = "new" | "working" | "returned" | "pending" | "passed" | "redo";
@@ -11,10 +12,12 @@ export interface TraceEvent {
 export interface Evaluation { tendency: "建议通过" | "建议请修改"; reasons: string[] }
 export interface Submission {
   id: string; revision: number; artifact: string; figure: boolean; time: number;
+  prompt?: string; executionArtifact?: string; taskConfig?: UnitConfig;
   evaluation?: Evaluation; decision?: "passed" | "redo"; feedback?: string;
 }
 export interface UnitState {
   prompt: string; receivedVersion: number;
+  executionArtifact: string; executionPrompt: string; executionConfig?: UnitConfig;
   status: UnitStatus; draft: string; figure: boolean; executeVersion: number;
   lastReturnedExecute: number; redoFloor: number; revision: number; submissions: Submission[];
 }
@@ -23,10 +26,15 @@ export interface CourseDraft {
   attached: Record<"a1" | "a2" | "a3", boolean>; invite: string; roster: string[];
 }
 export interface DemoState {
-  version: 4; role: Role; entered: boolean; lessonRead: boolean; topicConfirmed: boolean;
+  version: 6; role: Role; entered: boolean; lessonRead: boolean; topicConfirmed: boolean;
   topicTitle: string; answers: Record<string, string>; quizChecked: boolean;
   units: Record<PracticeId, UnitState>; events: TraceEvent[]; seq: number;
   courseDraft: CourseDraft; failNext: "generate" | "optimize" | "evaluate" | null;
+  unitConfigs: Record<ConfigId, UnitConfig>; consents: Record<PracticeId, Consent>;
+  institutionAuthorized: boolean; teacherAuthorized: boolean;
+  assetReviews: Record<PracticeId, AssetReview>;
+  audit: { time: number; unit?: PracticeId; summary: string }[];
+  research: { path: "own" | "mentor"; title: string; details: string; submitted: boolean; accepted: boolean; verified: boolean };
   notice: { message: string; tone: "success" | "error" | "info" } | null;
 }
 export type Action =
@@ -47,13 +55,27 @@ export type Action =
   | { type: "template" } | { type: "draft_attach"; unit: "a1" | "a2" | "a3"; value: boolean }
   | { type: "invite" } | { type: "roster" } | { type: "publish" };
 
-const emptyUnit = (id: PracticeId): UnitState => ({ prompt: unitOf(id).prompt || "", receivedVersion: 0, status: "new", draft: "", figure: false, executeVersion: 0, lastReturnedExecute: 0, redoFloor: 0, revision: 0, submissions: [] });
+export type GovernanceAction =
+  | { type: "configure"; unit: ConfigId; config: UnitConfig }
+  | { type: "consent"; unit: PracticeId; value: Consent }
+  | { type: "authorize"; party: "institution" | "teacher"; value: boolean }
+  | { type: "asset_review"; unit: PracticeId; review: AssetReview }
+  | { type: "candidate"; unit: PracticeId }
+  | { type: "research_apply"; path: "own" | "mentor"; title: string; details: string }
+  | { type: "research_accept"; verified: boolean };
+
+const emptyUnit = (id: PracticeId): UnitState => ({ prompt: unitOf(id).prompt || "", executionArtifact: "", executionPrompt: "", receivedVersion: 0, status: "new", draft: "", figure: false, executeVersion: 0, lastReturnedExecute: 0, redoFloor: 0, revision: 0, submissions: [] });
 export function createInitialState(): DemoState {
   return {
-    version: 4, role: "student", entered: true, lessonRead: false, topicConfirmed: true, topicTitle: TOPIC_TITLE,
+    version: 6, role: "student", entered: true, lessonRead: false, topicConfirmed: true, topicTitle: TOPIC_TITLE,
     answers: {}, quizChecked: false, units: { q1: emptyUnit("q1"), a1: emptyUnit("a1"), a2: emptyUnit("a2"), a3: emptyUnit("a3") },
     events: [], seq: 0, failNext: null, notice: null,
     courseDraft: { created: false, phase: "draft", attached: { a1: true, a2: true, a3: true }, invite: "", roster: [] },
+    unitConfigs: Object.fromEntries(["lesson", ...PRACTICE_IDS].map((id) => { const unit = unitOf(id as ConfigId); return [id, { title: unit.title, description: unit.description, requirements: unit.prompt || unit.goals.join("；"), duanyanRequired: id !== "lesson" }]; })) as Record<ConfigId, UnitConfig>,
+    consents: { q1: "education", a1: "education", a2: "education", a3: "education" },
+    institutionAuthorized: false, teacherAuthorized: false,
+    assetReviews: { q1: emptyReview(), a1: emptyReview(), a2: emptyReview(), a3: emptyReview() }, audit: [],
+    research: { path: "own", title: "", details: "", submitted: false, accepted: false, verified: false },
   };
 }
 export const latestSubmission = (state: DemoState, unit: PracticeId) => state.units[unit].submissions.at(-1);
@@ -119,10 +141,60 @@ function operationFails(state: DemoState, operation: "generate" | "optimize" | "
   notify(state, { generate: "生成", optimize: "优化", evaluate: "评估" }[operation] + "暂时失败，本次未写入成功事件。内容已保留，可以重试。", "error");
   return true;
 }
-export function reducer(state: DemoState, action: Action): DemoState {
+export function reducer(state: DemoState, action: Action | GovernanceAction): DemoState {
   if (action.type === "reset") return createInitialState();
   const next = structuredClone(state); next.notice = null;
   switch (action.type) {
+    case "configure": {
+      if (next.role !== "teacher") return notify(next, "请进入教师工作台配置。", "error");
+      if (action.config.title.trim().length < 4 || !action.config.description.trim() || !action.config.requirements.trim()) return notify(next, "请填写标题、说明与任务要求。", "error");
+      if (action.unit === "lesson" ? action.config.duanyanRequired : !action.config.duanyanRequired) return notify(next, "教学课时只需阅读；本课测验和三份作业须在端砚执行。", "error");
+      next.unitConfigs[action.unit] = { ...action.config };
+      if (action.unit !== "lesson") { next.units[action.unit].prompt = action.config.requirements; next.assetReviews[action.unit].approved = false; }
+      return notify(next, "配置已保存，学员页和新生成的 Prompt 已同步。", "success");
+    }
+    case "consent": {
+      if (next.role !== "student") return notify(next, "学生授权须由学员本人选择。", "error");
+      next.consents[action.unit] = action.value; next.assetReviews[action.unit].approved = false;
+      next.audit.push({ time: Date.now(), unit: action.unit, summary: action.value === "training" ? "学员主动选择演示训练授权；仍需复核。" : "学员仅选教学或撤回授权，排除训练候选；课程提交与反馈保留。" });
+      return notify(next, "用途选择已保存，不影响学习、提交和学分判断。", "success");
+    }
+    case "authorize": {
+      if (next.role !== "teacher") return notify(next, "请在教师工作台演示合作授权。", "error");
+      if (action.party === "institution") next.institutionAuthorized = action.value; else next.teacherAuthorized = action.value;
+      for (const id of PRACTICE_IDS) next.assetReviews[id].approved = false;
+      next.audit.push({ time: Date.now(), summary: (action.party === "institution" ? "高校框架" : "教师贡献") + "演示授权：" + action.value });
+      return notify(next, "合作授权演示状态已更新，候选资格需重新审核。", "success");
+    }
+    case "asset_review": {
+      if (next.role !== "teacher") return notify(next, "质量复核由教师执行。", "error");
+      if (!latestSubmission(next, action.unit)) return notify(next, "请先提交产物，再保存复核。", "error");
+      if (action.review.note.trim().length < 6 || QUALITY_DIMENSIONS.some((key) => !Number.isInteger(action.review.scores[key]) || action.review.scores[key] < 1 || action.review.scores[key] > 5)) return notify(next, "请填写十个维度的 1—5 分和至少 6 字的专家说明。", "error");
+      next.assetReviews[action.unit] = { ...action.review, submissionId: latestSubmission(next, action.unit)!.id, approved: false };
+      next.audit.push({ time: Date.now(), unit: action.unit, summary: "保存当前提交的专家质量复核，待候选审核。" });
+      return notify(next, "质量复核已保存；质量评分不作为课程成绩。", "success");
+    }
+    case "candidate": {
+      if (next.role !== "teacher") return notify(next, "候选审核由教师执行。", "error");
+      const problems = candidateProblems(next, action.unit);
+      if (problems.length) return notify(next, "候选审核阻断：" + problems.join("；"), "error");
+      next.assetReviews[action.unit].approved = true;
+      next.audit.push({ time: Date.now(), unit: action.unit, summary: "通过训练候选流程预览；资产仍为 Mock，未进入真实训练。" });
+      return notify(next, "训练候选流程预览已通过，未进入真实训练。", "success");
+    }
+    case "research_apply": {
+      if (next.role !== "student") return notify(next, "请以学员身份申请。", "error");
+      if (!ASSIGNMENT_IDS.every((id) => next.units[id].status === "passed")) return notify(next, "可以浏览两条路径；申请实战前，请先取得三份作业的教师通过。", "error");
+      if (action.title.trim().length < 6 || action.details.trim().length < 12) return notify(next, "请填写课题名和真实问题、数据来源、时间投入等申请材料。", "error");
+      next.research = { path: action.path, title: action.title.trim(), details: action.details.trim(), submitted: true, accepted: false, verified: false };
+      return notify(next, "实战申请已提交，等待课程导师与 PI 审核；所有内容仍为演示。", "success");
+    }
+    case "research_accept": {
+      if (next.role !== "teacher" || !next.research.submitted) return notify(next, "请先由学员提交申请，再由导师审核。", "error");
+      if (!action.verified) return notify(next, "请确认已演示核验问题、数据来源、可复现目标与导师适配。", "error");
+      next.research.accepted = true; next.research.verified = true;
+      return notify(next, "导师审核演示已确认，可进入实战；尚未验收真实成果或签发证书。", "success");
+    }
     case "load_sample": {
       const role = next.role;
       let sample = next;
@@ -163,11 +235,11 @@ export function reducer(state: DemoState, action: Action): DemoState {
       next.units[action.unit].prompt = [
         "当前课题：" + next.topicTitle,
         "课程单元：" + unit.label + " · " + unit.shortTitle,
-        "任务要求：\n" + unit.prompt,
+        "任务要求：\n" + next.unitConfigs[action.unit].requirements,
         "预期交付物：" + unit.outcome,
         "随任务带入：课程阅读清单、当前课题上下文及本单元资料；缺少前置产物时使用课程示例。",
         action.instructions?.trim() ? "补充要求：" + action.instructions.trim() : "",
-        "完成标准：返回交付物及执行记录，由课程网页检查、优化和提交，不自动判定通过。",
+        "完成标准：返回任务定义、执行步骤、来源、中间与最终产物、失败或限制；按问题范围、引用对应、证据边界和轨迹完整性核验。由课程网页检查、优化和提交，不自动判定通过。",
       ].filter(Boolean).join("\n\n");
       return notify(next, "任务 Prompt 已在网页生成，可编辑后交给端砚执行。", "success");
     }
@@ -190,10 +262,13 @@ export function reducer(state: DemoState, action: Action): DemoState {
     case "generate": {
       const guard = requireStudent(next, action.unit);
       if (guard) return notify(next, guard, "error");
-      if (operationFails(next, "generate")) return next;
+      if (operationFails(next, "generate")) { next.audit.push({ time: Date.now(), unit: action.unit, summary: "Mock Agent 执行失败，未写成功轨迹。" }); return next; }
       const work = next.units[action.unit];
       if (!work.prompt?.trim()) work.prompt = unitOf(action.unit).prompt || "";
       work.draft = ARTIFACTS[action.unit]; work.figure = action.unit === "a3"; work.executeVersion += 1;
+      work.executionArtifact = work.draft;
+      work.executionPrompt = work.prompt;
+      work.executionConfig = structuredClone(next.unitConfigs[action.unit]);
       work.receivedVersion = 0;
       if (work.status === "new") work.status = "working";
       trace(next, action.unit, "bring_in", "接收课程网页准备的 Prompt、课题和随课资料。");
@@ -231,7 +306,8 @@ export function reducer(state: DemoState, action: Action): DemoState {
       if (previous?.artifact === work.draft && work.lastReturnedExecute === work.executeVersion && work.status !== "redo") return notify(next, "这份产物已回传，重复操作不会增加回流计数。");
       const first = !next.events.some((event) => event.unit === action.unit && event.kind === "return" && event.counted);
       work.revision += 1;
-      const submission: Submission = { id: action.unit + "-r" + work.revision, revision: work.revision, artifact: work.draft, figure: work.figure, time: Date.now() };
+      const submission: Submission = { id: action.unit + "-r" + work.revision, revision: work.revision, artifact: work.draft, figure: work.figure, time: Date.now(), prompt: work.executionPrompt, executionArtifact: work.executionArtifact, taskConfig: work.executionConfig };
+      next.assetReviews[action.unit] = emptyReview();
       work.submissions.push(submission); work.lastReturnedExecute = work.executeVersion;
       work.status = action.unit === "q1" ? "pending" : "returned";
       trace(next, action.unit, "return", "已从课程网页提交" + unitOf(action.unit).label + "的交付物与执行记录。", action.unit === "a2" || action.unit === "a3" ? "followup" : "return", first, submission.id);

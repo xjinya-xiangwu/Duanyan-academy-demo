@@ -31,7 +31,7 @@ test("学员完整上课、逐份回传与教师修改闭环", async ({ page }) 
   await openUnit(page, "a3"); await executeAndReturn(page);
   await expect(page.getByTestId("student-feedback")).toContainText("等待老师");
   await page.getByTestId("role-teacher").click();
-  await expect(page.getByTestId("timeline")).toContainText("回传产物");
+  await expect(page.getByTestId("timeline")).toContainText("网页提交");
   await page.getByTestId("eval").click();
   await expect(page.getByTestId("eval-note")).toContainText("建议通过");
   await page.getByTestId("teacher-comment").fill("请明确机制图与临床结论的边界。");

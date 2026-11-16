@@ -6,7 +6,9 @@ import { useDemo } from "../store";
 import { Breadcrumb, CourseLayout, NextLesson, ReadingList, ResourceList, Status, TextArtifact, UnitEvidenceSummary, UnitHeading, kindIcon } from "../components/common";
 import { CourseArt, MechanismFigure } from "../components/visuals";
 import { Icon } from "../components/icons";
-import { TaskPreparation, WebResult } from "../components/course-work";
+import { DataConsent, TaskPreparation, WebResult } from "../components/course-work";
+import { displayUnit } from "../domain/assets";
+import { CourseJourney } from "../components/course-journey";
 
 export function CatalogPage() {
   const { state } = useDemo();
@@ -18,7 +20,7 @@ export function CatalogPage() {
 }
 function CourseOutlineRow({ id, index }: { id: UnitId; index: number }) {
   const { state, dispatch } = useDemo();
-  const unit = unitOf(id), unlocked = isUnlocked(state, id);
+  const unit = displayUnit(state, id), unlocked = isUnlocked(state, id);
   const content = <><span className={"outline-number" + (id === "lesson" && state.lessonRead || isPracticeId(id) && hasEvidence(state, id) ? " done" : "")}>{id === "lesson" && state.lessonRead || isPracticeId(id) && hasEvidence(state, id) ? <Icon name="check" size={16} /> : String(index + 1).padStart(2, "0")}</span><span className="outline-copy"><span className="outline-kind"><Icon name={kindIcon(unit.kind)} size={13} />{unit.label}<span>·</span>{unit.duration}</span><strong>{unit.shortTitle}</strong></span><span className="outline-state">{isPracticeId(id) ? <Status value={state.units[id].status} /> : id === "lesson" && state.lessonRead ? <span className="read-label">已读</span> : id === "peer" ? <span className="muted">选读</span> : <span className="muted">可学习</span>}{unlocked ? <Icon name="chevron" size={17} /> : <Icon name="lock" size={16} />}</span></>;
   return <li data-testid={"unit-row-" + id}>{unlocked ? <Link className="outline-row" to={"/course/unit/" + id}>{content}</Link> : <button type="button" className="outline-row outline-locked" aria-label={unit.shortTitle + "，查看解锁条件"} onClick={() => dispatch({ type: "notice", message: id === "a2" ? "回传作业 01 后，即可开始论文作业。" : id === "a3" ? "回传作业 02 后，即可开始机制图作业。" : "先阅读教学讲义，再开始这个单元。" })}>{content}</button>}</li>;
 }
@@ -29,6 +31,7 @@ export function CoursePage() {
   return <div className="page course-home"><Breadcrumb /><section className="course-hero"><div className="course-hero-copy"><div className="course-tags"><span>生物医学</span><span>科研入门</span></div><h1>用 AI 开展<br />肿瘤免疫研究</h1><p className="hero-subtitle">{COURSE_SUBTITLE}</p><p className="hero-description">在一门课里，把文献中的线索，变成自己的研究问题、论文初稿和机制图。</p><div className="hero-facts"><span><Icon name="book" size={16} />1 课时</span><span>1 测验</span><span>3 作业</span><span>约 80 分钟</span></div><div className="hero-bottom"><Link className="button primary large" to={next ? "/course/unit/" + next : "/course/unit/a3"} data-testid="start-learning">{!state.lessonRead ? "开始学习" : next ? "继续学习" : "查看作业反馈"}<Icon name="arrow" size={18} /></Link><div className="instructor"><span className="avatar">周</span><span><strong>{TEACHER_NAME}</strong><small>授课教师</small></span></div></div></div><div className="hero-art-wrap"><CourseArt /><div className="art-caption"><span>一条通路，一个完整研究问题。</span><span>PD-1 / PD-L1</span></div></div></section>
     <div className="course-detail-grid"><section className="syllabus-section"><div className="section-heading"><h2>课程大纲</h2><span>全部单元可直接体验</span></div><div className="current-learning"><span className="live-dot" /><span>{currentStage(state)}</span></div><ol className="course-outline" data-testid="syllabus">{UNITS.map((unit, index) => <CourseOutlineRow key={unit.id} id={unit.id} index={index} />)}</ol><details className="course-notice"><summary><Icon name="info" size={16} />上课前，了解这条实践路径<Icon name="down" size={14} /></summary><p>本课测验的短实训，以及问题界定、论文、机制图三份作业，需在端砚中完成并回传到各自单元。三份作业齐套后，老师会逐份给出反馈。</p><p>阅读讲义帮助你开始；可抽检的产物与执行记录才构成实训提交。测验不能代替三份作业。</p><div className="inline-actions"><button type="button" onClick={() => dispatch({ type: "check_bundle" })}>检查三份作业是否齐套</button><button type="button" onClick={() => dispatch({ type: "claim" })}>尝试课页勾选完成</button></div></details>{bundleComplete(state) && <div className="bundle-note"><Icon name="check" size={18} /><p>三份作业已齐套。你可以在各作业页查看老师反馈。</p></div>}</section>
       <aside className="course-details-aside"><section><h2>你将带走什么</h2><ul className="outcome-list"><li><Icon name="target" /><div><strong>一个清楚的研究问题</strong><p>学会为问题设定范围，让每条文献主张有据可循。</p></div></li><li><Icon name="file" /><div><strong>一份可以继续打磨的初稿</strong><p>把问题和证据组织成结构，而非拼接文献摘要。</p></div></li><li><Icon name="figure" /><div><strong>一张表达机制的教学图</strong><p>用图说清楚关系，同时保留证据的边界。</p></div></li></ul></section><section className="course-resources"><h2>随课资料</h2><ResourceList compact /><p className="small-note">阅读清单贯穿全课；资源可下载。</p></section><div className="course-audience"><h3>适合谁学习</h3><p>希望尝试 AI 辅助文献阅读与科研表达的生医学生。无需编程基础，建议具备基础免疫学知识。</p></div></aside></div>
+    <CourseJourney /><p><Link className="text-link" to="/course/portfolio">查看我的研究过程资产包</Link></p>
   </div>;
 }
 export function LessonPage() {
@@ -75,6 +78,7 @@ export function UnitPage() {
     <div className="unit-status-line"><Status value={slot.status} /><span>网页准备与优化 · 端砚只执行并返回结果</span></div>
     {id === "a1" ? <TopicConfirmation /> : <div className="topic-context"><Icon name="branch" size={17} /><span>当前课题：{state.topicTitle}</span></div>}
     <TaskPreparation id={id} onExecute={openStudio} />
+    <DataConsent id={id} />
     <WebResult id={id} />
     <SubmissionSlot id={id} />
     {id === "q1" && <QuizConcepts />}

@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { READING, UNITS, readingCSV, unitOf, type PracticeId, type UnitId } from "../domain/content";
+import { READING, UNITS, readingCSV, type PracticeId, type UnitId } from "../domain/content";
 import { hasEvidence, isUnlocked, statusLabel, type TraceEvent, type UnitStatus } from "../domain/logic";
 import { useDemo } from "../store";
+import { displayUnit } from "../domain/assets";
 import { Icon, type IconName } from "./icons";
 
 export const kindIcon = (kind: string): IconName => ({ lesson: "book", quiz: "quiz", assignment: "file", optional: "users" }[kind] as IconName) || "file";
@@ -47,7 +48,8 @@ export function CourseLayout({ current, children }: { current: UnitId; children:
   return <div className="course-layout"><aside className="lesson-sidebar"><Link className="sidebar-course" to="/course"><Icon name="back" size={16} /><span>返回课程首页</span></Link><h2>用 AI 开展<br />肿瘤免疫研究</h2><p className="sidebar-subtitle">PD-1／PD-L1 研究入门</p><div className="sidebar-divider" /><SyllabusNav current={current} /><div className="sidebar-help"><Icon name="info" size={16} /><p>作业承接同一课题。<br />每一次练习，都回到课程里。</p></div></aside><div className="lesson-body"><details className="mobile-syllabus"><summary><Icon name="book" size={17} />课程目录<Icon name="down" size={16} /></summary><SyllabusNav current={current} /></details>{children}</div></div>;
 }
 export function UnitHeading({ id }: { id: UnitId }) {
-  const unit = unitOf(id);
+  const { state } = useDemo();
+  const unit = displayUnit(state, id);
   return <header className="unit-heading"><Breadcrumb current={unit.label} /><div className="unit-meta"><span>{unit.label}</span><span><Icon name="clock" size={14} />{unit.duration}</span></div><h1>{unit.title}</h1><p>{unit.description}</p></header>;
 }
 export function NextLesson({ to, label, text = "继续学习" }: { to: string; label: string; text?: string }) {
