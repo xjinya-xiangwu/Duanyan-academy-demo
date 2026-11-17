@@ -18,9 +18,11 @@ async function executeAndReturn(page: Page, optimize = false) {
 }
 test("学员完整上课、逐份回传与教师修改闭环", async ({ page }) => {
   await page.goto("/"); await page.evaluate(() => localStorage.clear()); await page.reload();
+  await page.goto("/#/course/biomed");
   await expect(page.getByRole("heading", { name: /用 AI 开展/ })).toBeVisible();
   await page.getByTestId("start-learning").click();
   await page.getByTestId("mark-read").click();
+  await page.getByText("学习目标、测验与参考资料", { exact: true }).click();
   await page.getByRole("radio", { name: /参与抑制 T 细胞/ }).check();
   await page.getByRole("radio", { name: /提供早期安全性与活性线索/ }).check();
   await page.getByTestId("check-quiz").click();
@@ -68,7 +70,7 @@ test("桌面与窄屏课程可读且无页面横向溢出", async ({ page }) => 
   mkdirSync(screenshots, { recursive: true });
   for (const width of [320, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 960 });
-    await page.goto("/#/course");
+    await page.goto("/#/course/biomed");
     await expect(page.getByTestId("start-learning")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.screenshot({ path: join(screenshots, "course-" + width + ".png"), fullPage: true });

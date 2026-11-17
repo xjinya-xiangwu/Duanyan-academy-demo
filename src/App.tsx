@@ -1,18 +1,22 @@
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import { DemoProvider } from "./store";
 import { Shell } from "./shell";
-import { CatalogPage, CoursePage, EnterPage, LessonPage, UnitPage } from "./pages/student";
+import { CoursePage, EnterPage, LessonPage, UnitPage } from "./pages/student";
 import { StudioPage } from "./pages/studio";
 import { TeacherPage, ReviewPage } from "./pages/teacher";
 import { MetricsPage } from "./pages/metrics";
 import { ResearchPage } from "./pages/research";
 import { PortfolioPage } from "./pages/dataset";
+import { GeneralCoursePage, ChapterPage, ChapterStudioPage } from "./pages/chapters";
 export function App() {
   return <HashRouter><DemoProvider><Routes><Route element={<Shell />}>
     <Route path="/" element={<Navigate to="/course" replace />} />
-    <Route path="/courses" element={<CatalogPage />} />
+    <Route path="/courses" element={<Navigate to="/course" replace />} />
     <Route path="/enter" element={<EnterPage />} />
-    <Route path="/course" element={<CoursePage />} />
+    <Route path="/course" element={<GeneralCoursePage />} />
+    <Route path="/course/chapter/:chapter" element={<ChapterPage />} />
+    <Route path="/course/chapter/:chapter/studio" element={<ChapterStudioPage />} />
+    <Route path="/course/biomed" element={<CoursePage />} />
     <Route path="/course/unit/lesson" element={<LessonPage />} />
     <Route path="/course/unit/:unit" element={<UnitPage />} />
     <Route path="/course/studio/:unit" element={<StudioPage />} />

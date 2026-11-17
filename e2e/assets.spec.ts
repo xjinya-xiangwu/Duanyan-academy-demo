@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 test("旧版浏览器进度保留，未审历史不会被升级为候选", async ({ page }) => {
   await page.goto("/"); await page.evaluate(() => localStorage.clear()); await page.reload();
-  await page.getByTestId("role-teacher").click(); await page.getByTestId("load-complete-sample").click();
+  await page.getByTestId("role-teacher").click(); await page.getByRole("button", { name: "班级进度", exact: true }).click(); await page.getByTestId("load-complete-sample").click();
   await page.evaluate(() => {
     const key = "duanyan-academy-demo-v04", state = JSON.parse(localStorage.getItem(key)!);
     state.version = 4;
@@ -15,7 +15,7 @@ test("旧版浏览器进度保留，未审历史不会被升级为候选", async
   await page.reload();
   await page.goto("/#/course/teacher?tab=dataset"); await expect(page.getByTestId("dataset-count")).toContainText("4 个");
   await page.goto("/#/course/evidence"); await expect(page.getByTestId("candidate-total")).toContainText("0");
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duanyan-academy-demo-v04")!).version)).toBe(7);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duanyan-academy-demo-v04")!).version)).toBe(8);
 });
 
 test("新页面在手机与桌面可读、键盘可用，资产包可下载", async ({ page }) => {
@@ -23,7 +23,7 @@ test("新页面在手机与桌面可读、键盘可用，资产包可下载", as
   mkdirSync(shots, { recursive: true });
   const errors: string[] = []; page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/"); await page.evaluate(() => localStorage.clear()); await page.reload();
-  await page.getByTestId("role-teacher").click(); await page.getByTestId("load-complete-sample").click();
+  await page.getByTestId("role-teacher").click(); await page.getByRole("button", { name: "班级进度", exact: true }).click(); await page.getByTestId("load-complete-sample").click();
   for (const width of [320, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 960 });
     for (const route of ["/course/teacher?tab=configure", "/course/teacher?tab=dataset", "/course/review/q1", "/course/research"]) {

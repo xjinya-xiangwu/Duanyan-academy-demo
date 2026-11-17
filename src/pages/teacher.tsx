@@ -11,6 +11,8 @@ import { AssignmentManagement } from "./assignments";
 import { AnnotationWorkbench } from "../components/annotation-workbench";
 import { TrajectoryViewer } from "../components/trajectory-viewer";
 import { FinishedAssets } from "./finished-assets";
+import { ChapterSubmissions } from "./chapters";
+import { GENERAL_COURSE_TITLE } from "../domain/chapters";
 
 function AssignmentSetup() {
   const { state, dispatch } = useDemo(), draft = state.courseDraft;
@@ -36,9 +38,9 @@ function ClassProgress() {
 export function TeacherPage() {
   const { state } = useDemo();
   const [params, setParams] = useSearchParams();
-  const tab = params.get("tab") || "progress";
+  const tab = params.get("tab") || "chapters";
   if (state.role !== "teacher") return <Navigate to="/course" replace />;
-  return <div className="page teacher-page"><Breadcrumb current="教师工作台" /><header className="teacher-page-heading"><div><h1>{COURSE_TITLE}</h1><p>教师工作台 · 课程配置、任务评审与科研资产治理</p></div><Link className="text-link" to="/course/evidence">资产质量与指标<Icon name="arrow" size={15} /></Link></header><nav className="course-tabs" aria-label="课程教师工作台">{[["progress", "班级进度"], ["configure", "环节配置"], ["assignments", "作业管理"], ["dataset", "科研资产数据集"], ["setup", "布置与发布"]].map(([key, label]) => <button key={key} aria-pressed={tab === key} onClick={() => setParams({ tab: key })}>{label}</button>)}</nav>{tab === "setup" ? <AssignmentSetup /> : tab === "configure" ? <Configuration /> : tab === "assignments" ? <AssignmentManagement /> : tab === "dataset" ? <><FinishedAssets /><Dataset /></> : <ClassProgress />}<p><Link className="text-link" to="/course/research">查看实战申请与导师审核<Icon name="arrow" size={15} /></Link></p></div>;
+  return <div className="page teacher-page"><Breadcrumb current="教师工作台" /><header className="teacher-page-heading"><div><h1>{tab === "chapters" ? GENERAL_COURSE_TITLE : COURSE_TITLE}</h1><p>教师工作台 · 课程配置、任务评审与科研资产治理</p></div><Link className="text-link" to="/course/evidence">资产质量与指标<Icon name="arrow" size={15} /></Link></header><nav className="course-tabs" aria-label="课程教师工作台">{[["chapters", "通识课章节成果"], ["progress", "班级进度"], ["configure", "环节配置"], ["assignments", "作业管理"], ["dataset", "科研资产数据集"], ["setup", "布置与发布"]].map(([key, label]) => <button key={key} aria-pressed={tab === key} onClick={() => setParams({ tab: key })}>{label}</button>)}</nav>{tab === "chapters" ? <ChapterSubmissions /> : tab === "setup" ? <AssignmentSetup /> : tab === "configure" ? <Configuration /> : tab === "assignments" ? <AssignmentManagement /> : tab === "dataset" ? <><FinishedAssets /><Dataset /></> : <ClassProgress />}<p><Link className="text-link" to="/course/research">查看实战申请与导师审核<Icon name="arrow" size={15} /></Link></p></div>;
 }
 export function ReviewPage() {
   const { unit: param } = useParams();

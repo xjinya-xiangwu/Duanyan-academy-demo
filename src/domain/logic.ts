@@ -1,6 +1,7 @@
 import { ARTIFACTS, ASSIGNMENT_IDS, INVITE_CODE, OPTIMIZATIONS, PRACTICE_IDS, QUIZ_QUESTIONS, STUDENT_NAME, TOPIC_ID, TOPIC_TITLE, unitOf, type PracticeId, type UnitId } from "./content";
 import { candidateProblems, emptyReview, QUALITY_DIMENSIONS, type AssetReview, type ConfigId, type UnitConfig } from "./assets";
 import { artifactBlocks, createTaskRun, FIELD_DEFINITIONS, fieldsOf, templateOf, type Annotation, type AnnotationTemplate, type FieldKey, type StructuredFields, type TaskRun } from "./trajectory";
+import { chapterReducer, initialChapters, type ChapterAction, type ChapterId, type ChapterTaskState } from "./chapters";
 
 export type Role = "student" | "teacher";
 export type UnitStatus = "new" | "working" | "returned" | "pending" | "passed" | "redo";
@@ -29,7 +30,8 @@ export interface CourseDraft {
   attached: Record<"a1" | "a2" | "a3", boolean>; invite: string; roster: string[];
 }
 export interface DemoState {
-  version: 7; role: Role; entered: boolean; lessonRead: boolean; topicConfirmed: boolean;
+  version: 8; role: Role; entered: boolean; lessonRead: boolean; topicConfirmed: boolean;
+  chapters: Record<ChapterId, ChapterTaskState>;
   topicTitle: string; answers: Record<string, string>; quizChecked: boolean;
   units: Record<PracticeId, UnitState>; events: TraceEvent[]; seq: number;
   courseDraft: CourseDraft; failNext: "generate" | "optimize" | "evaluate" | null;
@@ -72,7 +74,7 @@ export type GovernanceAction =
 const emptyUnit = (id: PracticeId): UnitState => ({ prompt: unitOf(id).prompt || "", executionArtifact: "", executionPrompt: "", receivedVersion: 0, status: "new", draft: "", figure: false, executeVersion: 0, lastReturnedExecute: 0, redoFloor: 0, revision: 0, submissions: [], runs: [], artifactVersion: 0, artifactHistory: [] });
 export function createInitialState(): DemoState {
   return {
-    version: 7, role: "student", entered: true, lessonRead: false, topicConfirmed: true, topicTitle: TOPIC_TITLE,
+    version: 8, chapters: initialChapters(), role: "student", entered: true, lessonRead: false, topicConfirmed: true, topicTitle: TOPIC_TITLE,
     answers: {}, quizChecked: false, units: { q1: emptyUnit("q1"), a1: emptyUnit("a1"), a2: emptyUnit("a2"), a3: emptyUnit("a3") },
     events: [], seq: 0, failNext: null, notice: null,
     courseDraft: { created: false, phase: "draft", attached: { a1: true, a2: true, a3: true }, invite: "", roster: [] },
@@ -151,9 +153,14 @@ function operationFails(state: DemoState, operation: "generate" | "optimize" | "
   notify(state, { generate: "生成", optimize: "优化", evaluate: "评估" }[operation] + "暂时失败，本次未写入成功事件。内容已保留，可以重试。", "error");
   return true;
 }
-export function reducer(state: DemoState, action: Action | GovernanceAction): DemoState {
+export function reducer(state: DemoState, action: Action | GovernanceAction | ChapterAction): DemoState {
   if (action.type === "reset") return createInitialState();
   const next = structuredClone(state); next.notice = null;
+  if ("id" in action) {
+    if (state.role !== "student" || !state.entered) return notify(next, "请以学员身份进入课程后操作。", "error");
+    next.chapters[action.id] = chapterReducer(state.chapters[action.id], action);
+    return next;
+  }
   switch (action.type) {
     case "configure": {
       if (next.role !== "teacher") return notify(next, "请进入教师工作台配置。", "error");

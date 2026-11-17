@@ -80,10 +80,11 @@ export function UnitPage() {
     <TaskPreparation id={id} onExecute={openStudio} />
     <WebResult id={id} />
     <SubmissionSlot id={id} />
+    <details className="chapter-secondary"><summary>学习目标、测验与参考资料</summary>
     {id === "q1" && <QuizConcepts />}
     <section className="assignment-brief"><h2>{id === "q1" ? "这次短实训的目标" : "作业目标与要求"}</h2><p className="assignment-outcome">{unit.outcome}</p><ol className="task-goals">{unit.goals.map((goal) => <li key={goal}>{goal}</li>)}</ol>{slot.status === "redo" && <div className="redo-callout"><Icon name="message" size={18} /><p>请按老师意见重新执行任务，取回结果后在网页检查、优化与提交。</p></div>}<p className="small-note">课程网页不会自动提交；站外文稿或课页勾选不能代替 Agent 执行记录。</p></section>
     {submission && <NextLesson to={"/course/unit/" + following} label={unitOf(following).shortTitle} text={id === "a3" ? "还有一项选读" : "下一步"} />}
-    <section className="unit-resources"><h2>这次练习的资料</h2><ResourceList compact unit={id} /></section>
+    <section className="unit-resources"><h2>这次练习的资料</h2><ResourceList compact unit={id} /></section></details>
   </CourseLayout>;
 }
 export function EnterPage() {

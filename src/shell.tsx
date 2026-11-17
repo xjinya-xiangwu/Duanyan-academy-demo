@@ -21,15 +21,16 @@ export function Shell() {
     dispatch({ type: "role", role });
     const match = location.pathname.match(/\/(?:unit|studio|review)\/(q1|a1|a2|a3)/);
     const unit = match?.[1];
-    if (role === "teacher") navigate(unit && isPracticeId(unit) && latestSubmission(state, unit) ? "/course/review/" + unit : "/course/teacher");
-    else navigate(unit && isPracticeId(unit) ? "/course/unit/" + unit : "/course");
+    const chapter = location.pathname.match(/\/course\/chapter\/([^/]+)/)?.[1];
+    if (role === "teacher") navigate(chapter ? "/course/teacher?tab=chapters" : unit && isPracticeId(unit) && latestSubmission(state, unit) ? "/course/review/" + unit : "/course/teacher");
+    else navigate(chapter ? "/course/chapter/" + chapter : unit && isPracticeId(unit) ? "/course/unit/" + unit : "/course");
   }
   const teacher = state.role === "teacher";
   return <div className="app-shell">
     <a className="skip-link" href="#main-content" onClick={(event) => { event.preventDefault(); mainRef.current?.focus(); }}>跳到主要内容</a>
     <header className="site-header"><div className="header-inner">
       <Link to="/course" className="brand" aria-label="端砚学院，课程首页"><InkLogo /><span>端砚学院<span className="brand-en">DUANYAN ACADEMY</span></span></Link>
-      <nav className="primary-navigation" aria-label="主导航"><NavLink to="/courses">课程</NavLink><NavLink to="/course" end>当前课程</NavLink></nav>
+      <nav className="primary-navigation" aria-label="主导航"><NavLink to="/course" end>课程章节</NavLink></nav>
       <div className="header-account"><button type="button" className="view-switch" data-testid={teacher ? "role-student" : "role-teacher"} onClick={() => switchRole(teacher ? "student" : "teacher")}><Icon name={teacher ? "book" : "users"} size={16} />{teacher ? "以学员查看" : "教师视图"}</button><span className="account-divider" /><span className="avatar avatar-small">{teacher ? "周" : "林"}</span><span className="account-name">{teacher ? "周衡" : "林可"}</span></div>
     </div></header>
     <main id="main-content" ref={mainRef} tabIndex={-1}><Outlet /></main>
